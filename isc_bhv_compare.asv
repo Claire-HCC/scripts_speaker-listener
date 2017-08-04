@@ -1,0 +1,53 @@
+
+clear all
+close all
+set_parameters
+thr_r=0.2;
+
+intervals=[-4 -2;
+    -1 1;
+    2 4]
+interval_names={'s_precede','sl_',''}
+for ei=1%:2;
+    exp= experiments{ei};
+    
+    load([expdir exp '/fmri/mat/wholeBrain/isc_sl_peakR.mat' ],'isc_sl_peakR');
+    load([expdir exp '/fmri/mat/wholeBrain/isc_sl_peakT.mat' ],'isc_sl_peakT');
+    
+    
+    voxn=[];
+    for si=1:size(isc_sl_peakR,3);
+        
+        i=find(isc_sl_peakR(:,:,si)>0.2 & isc_sl_peakT(:,:,si) >=2);
+        l_preced(i,:,si)=isc_sl_peakR(i,:,si);
+        l_preced_voxn(si,1)=sum(l_preced(:,:,si)~=0);
+        
+        i=find(isc_sl_peakR(:,:,si)>0.2 & isc_sl_peakT(:,:,si) <=-2);
+        s_preced(i,:,si)=isc_sl_peakR(i,:,si);
+        s_preced_voxn(si,1)=sum(s_preced(:,:,si)~=0);
+        
+        i=find(isc_sl_peakR(:,:,si)>0.2 & isc_sl_peakT(:,:,si) > -2 & isc_sl_peakT(:,:,si) <2);
+        sl_syn(i,:,si)=isc_sl_peakR(i,:,si);
+        sl_syn_voxn(si,1)=sum(sl_syn(:,:,si)~=0);
+        
+    end
+end
+
+
+nii.hdr=load_nii_hdr('MNI152_T1_3mm_brain.nii');
+ data=mean(sum(l_preced,2),3);
+ data((end+1):(61*73*61),:)=0;
+nii.img=reshape(data,61,73,61);
+save_nii(nii,'l_preced.nii');
+
+nii.hdr=load_nii_hdr('MNI152_T1_3mm_brain.nii');
+ data=mean(sum(s_preced,2),3);
+ data((end+1):(61*73*61),:)=0;
+nii.img=reshape(data,61,73,61);
+save_nii(nii,'s_preced.nii');
+
+nii.hdr=load_nii_hdr('MNI152_T1_3mm_brain.nii');
+ data=mean(sum(sl_syn,2),3);
+ data((end+1):(61*73*61),:)=0;
+nii.img=reshape(data,61,73,61);
+save_nii(nii,'sl_syn.nii');
