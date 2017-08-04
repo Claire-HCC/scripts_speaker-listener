@@ -4,10 +4,11 @@ set_parameters;
 
 resamp_factor = 1;
 
-for ei = 1%:2;
-    stimname =ls([expdir experiments{ei} '/sound/*wav']);
+for ei = 1:2;
+  %  stimname =ls([expdir experiments{ei} '/sound/*wav']);
+   stimname=experiments{ei};
     stimname=strrep([expdir experiments{ei} '/sound/' stimname],'.wav','');
-    
+  
     [w, audfs] = audioread([stimname '.wav']);
     
     w0=w(wav_crop_start*audfs:end);
