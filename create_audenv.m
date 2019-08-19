@@ -3,16 +3,19 @@ clear
 set_parameters;
 
 resamp_factor = 1;
+cropped='cropped';%'uncropped',"";
+role='speaker';
 
-for ei = 1:2;
-  %  stimname =ls([expdir experiments{ei} '/sound/*wav']);
-   stimname=experiments{ei};
-    stimname=strrep([expdir experiments{ei} '/sound/' stimname],'.wav','');
-  
-    [w, audfs] = audioread([stimname '.wav']);
+for ei = 1:2;%:4;
+    %  stimname =ls([expdir experiments{ei} '/sound/*wav']);
+    % stimname=[experiments{ei} '_' role '_' cropped];
+    stimname=ls([expdir experiments{ei} '/sound/*wav']);
+    stimname=strrep( stimname,'.wav','');
     
-    w0=w(wav_crop_start*audfs:end);
-    audiowrite([expdir experiments{ei} '/sound/' experiments{ei} '.wav'],w0,audfs)
+    [w, audfs] = audioread([expdir experiments{ei} '/sound/' stimname '.wav']);
+    
+    w0=w;
+    %audiowrite([expdir experiments{ei} '/sound/' experiments{ei} '.wav'],w0,audfs)
     
     w=w0(:,1);
     w = resample(w, 1, resamp_factor);  %downsample for easier manipulation
@@ -34,7 +37,8 @@ for ei = 1:2;
     audenv = audpow_slow_shifted_100;
     aud=audenv;
     
-    save([ experiments{ei}  '_audenv'],'aud');
+    save( [expdir experiments{ei} '/sound/'  stimname '_audenv'],'aud');
+    %   save([expdir experiments{ei} '/sound/'  experiments{ei} '_' role '_'  cropped '_audenv'],'aud');
     
     xBF.dt=tr(ei); % TR
     xBF.name='hrf'% (with time and dispersion derivatives)';
@@ -42,7 +46,8 @@ for ei = 1:2;
     
     audenv=audenv-mean(audenv);
     aud=conv(audenv,bf.bf);
-    save([ experiments{ei}  '_audhrf'],'aud');
+    save( [expdir experiments{ei} '/sound/'  stimname '_audhrf'],'aud');
+    %  save( [expdir experiments{ei} '/sound/'  experiments{ei} '_' role '_' cropped '_audhrf'],'aud');
     
 end
 

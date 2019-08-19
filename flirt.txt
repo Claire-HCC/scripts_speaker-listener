@@ -1,0 +1,7 @@
+﻿role=listener
+for exp in merlin; do
+for s in {02..48}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/3x3x3mm/listener${s}.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152_T1_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii"  -applyxfm
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii" ;
+done ;
+done 

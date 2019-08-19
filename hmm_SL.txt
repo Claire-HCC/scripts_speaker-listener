@@ -1,0 +1,87 @@
+## create a new enviroment with conda and install brainiak in the created enviroment
+# module load anacondapy/3.4
+# conda create -n bnk python=3.4
+# source activate bnk python=3.4
+# conda install -c brainiak -c defaults -c conda-forge brainiak
+
+# https://www.digitalocean.com/community/tutorials/how-to-install-run-connect-to-jupyter-notebook-on-remote-server
+# open python in the conda enviroment where brainiak is installed
+module load anacondapy/3.4
+module load pyger
+source activate bnk
+export $(dbus-launch)
+python
+
+""
+import brainiak.eventseg.event
+import numpy as np
+import glob
+import os
+import scipy.io
+from scipy.stats import stats
+import logging
+import matplotlib.pyplot as plt
+
+logging.basicConfig(level=logging.DEBUG)
+
+# experiment specific parameters
+expdir = '/mnt/sink/scratch/claire/speaker-listener/'
+timeUnit='tr'
+froidir='mor';
+exps=['pieman','bronx','merlin','sherlock']
+rname='ABCshen222'
+    
+def score(evi,self):
+    C = np.corrcoef(self.T)                         
+    C = (C + C.T)/2                         # made symmetric
+    np.fill_diagonal(C, 0)                        # put 1 on the diagonal
+    score = 0
+    
+    C_withini=(np.subtract(np.tile(evi,[tn,1]),np.tile(evi,[tn,1]).T)==0)
+    C_betweeni=(np.subtract(np.tile(evi,[tn,1]),np.tile(evi,[tn,1]).T)!=0)
+    
+    # spatial correlation be- tween all pairs of time points that were separated by four time points
+    C_sample=np.zeros(C.shape)
+    C_sample[range(0,tn-5),range(5,tn)]=1
+    
+    
+    % within vs. cross boundary pattern correlation, following Baldassano (2017)
+    C_within=C[np.multiply(C_withini,C_sample)==1]
+    C_between=C[np.multiply(C_betweeni,C_sample)==1]
+    wbr=np.mean(C_within)-np.mean(C_between)
+    
+    return wbr
+
+# load mat file
+for exp in [exps[3]]:
+    for fname in  glob.glob(os.path.join(expdir + '/' + exp + '/fmri/timeseries/' + timeUnit + '/roi/' + froidir , 'zscore_listenerAll_'+rname+'.mat')):
+        data_mat=scipy.io.loadmat(fname)
+        gdata=data_mat['gdata']
+        
+        tn=gdata.shape[1]
+        subjn=gdata.shape[2]
+        voxn=gdata.shape[0]
+        
+        segments= np.empty((120,tn,subjn))
+        segments[:]=np.nan
+        wbrs=np.empty((120,1,subjn))
+        for s in range(subjn):
+            if np.sum(~np.isnan(gdata[:,:,s]))>0:
+                othersi=np.arange(subjn)
+                othersi=othersi[othersi!=s]
+                others=np.nanmean(gdata[:,:,othersi],axis=2)
+                self=gdata[:,:,s]
+                
+                
+                for Ki in range(9,120):
+                    K=Ki+1;
+                    # Find the events in this dataset
+                    seg = brainiak.eventseg.event.EventSegment(K)
+                    seg.fit(others.T) 
+                    evi=seg.segments_[0].argmax(axis=1)+1
+                    segments[Ki,:,s]=evi
+                    # wbrs[Ki,0,s]=score(evi,self)
+        scipy.io.savemat(expdir +'/scripts_speaker-listener/'+exp+'_'+rname+'_hmm.mat', {'segments':segments})
+    #    scipy.io.savemat(expdir +'/scripts_speaker-listener/'+exp+'_'+rname+'_hmm.mat', {'wbrs':wbrs,'segments':segments})
+
+

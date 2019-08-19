@@ -1,70 +1,58 @@
 clear all
 close all
+loc='cluster';
 set_parameters
 
-mask=  load_nii([expdir 'roi_mask/MNI152_T1_3mm_brain_mask.nii']);
-mask_mni=mask.img(:);
+roles={'listenerZscoreMean','speaker01'}; % 'speaker'
+lags=-10:10;
 
-role='speaker';
-lag=6;
+data=load_nii([expdir 'roi_mask/gray_matter_mask.nii']);
+mask=data.img;
 
-for ei=1:2;
-    exp=experiments{ei};
+for rolei=1:length(roles);
+    role=roles{rolei};
     
-    load([expdir experiments{ei} '/sound/' experiments{ei} '_audenv.mat' ]);
-    aud=zscore(aud);
-    
-    subjects=cellstr(ls([expdir experiments{ei} '/fmri/mat/wholeBrain/*' role '*subj*mat']));
-    
-    for si=1:length(subjects);
-        subj=subjects{si};
-        load([expdir experiments{ei} '/fmri/mat/wholeBrain/' subj]);
-        epi=zscore(data')';
+    for ei=1;
+        exp=experiments{ei};
+        subjects=cellstr(ls([expdir experiments{ei} '/fmri/mat/wholeBrain/' role '.mat']));
+        % subjects= subjects(~cellfun(@isempty,(regexp(subjects,'[0-9]*'))));
         
-        mask=find(sum(data')'~=0 & mask_mni~=0);
-        for vi = 1:length(mask);
-            v=mask(vi);
-            %  epi(v,:)=despike(epi(v,:)',[-3 3],5);
-            % ti=find(epi(v,:) > -3 & epi(v,:) <3);
+        for si=1%:length(subjects);
             
-            [r,lags]=xcorr(epi(v,:),aud(:),lag,'coeff');
-            pk=max(r);
-            pt=lags(r==pk); pt=pt(1);
-            audenv_peakR(v,1,si)=pk;
-            audenv_peakT(v,1,si)=pt;
+            [filepath,subj,ext] = fileparts(subjects{si});
+            
+            %  load([expdir experiments{ei} '/sound/' exp '_' strrep(subj,'.mat','') '_audenv.mat' ]);
+            load([expdir experiments{ei} '/sound/' exp '_listener_cropped_audenv.mat' ]);
+            aud=zscore(aud);
+            
+            load([expdir experiments{ei} '/fmri/mat/wholeBrain/' subj '.mat']);
+            epi=zscore(data')';
+            
+            voln=min(length(aud),size(epi,2));
+            
+            keptvox=find(sum(data')'~=0 & mask(:)~=0);
+            
+            aud_mat=repmat(aud(1:voln),1,length(keptvox))';
+            
+            lagcc_temp= lagcorr_claire(aud_mat',epi(keptvox,1:voln)',lags)';
+            [peakR peakT]=max(lagcc_temp');
+            peakT=lags(peakT);
+            
+            save([expdir exp '/fmri/mat/wholeBrain/aud/audenv_lagcorr_' subj '_' num2str(min(lags)) '-' num2str(max(lags)) '.mat'],'peakT','peakR','keptvox');
+            
+            peakR_nii=nan(voxn,1);
+            peakR_nii(keptvox,:)=peakR;
+            nii=mat2nii(peakR_nii);
+            save_nii(nii,[expdir experiments{ei} '/fmri/nii/wholeBrain/aud/audenv_lagcorr_' subj '_' num2str(min(lags)) '-' num2str(max(lags)) '_peakR.nii']);
+            
+            peakT_nii=nan(voxn,1);
+            peakT_nii(keptvox,:)=peakT;
+            nii=mat2nii(peakT_nii);
+            save_nii(nii,[expdir experiments{ei} '/fmri/nii/wholeBrain/aud/audenv_lagcorr_' subj '_' num2str(min(lags)) '-' num2str(max(lags)) '_peakT.nii']);
+               
+            clear peakR peakT
         end
-        
-        
-        nii.hdr=load_nii_hdr([expdir 'roi_mask/MNI152_T1_3mm_brain.nii']);
-        data=audenv_peakR(:,1,si);
-        data((end+1):(61*73*61),:)=0;
-        nii.img=reshape(data,61,73,61);
-        save_nii(nii,[expdir exp '/fmri/nii/wholeBrain/audenv_' subj '_peakR.nii']);
-        
-        nii.hdr=load_nii_hdr([expdir 'roi_mask/MNI152_T1_3mm_brain.nii']);
-        data=audenv_peakT(:,1,si);
-        data((end+1):(61*73*61),:)=0;
-        nii.img=reshape(data,61,73,61);
-        save_nii(nii,[expdir exp '/fmri/nii/wholeBrain/audenv_' subj '_peakT.nii']);
-        
-        
     end
-    save([expdir exp '/fmri/mat/wholeBrain/' exp '_audenv_' role '_peakR.mat' ],'audenv_peakR');
-    save([expdir exp '/fmri/mat/wholeBrain/' exp '_audenv_' role '_peakT.mat' ],'audenv_peakT');
-    
-    
-    nii.hdr=load_nii_hdr([expdir 'roi_mask/MNI152_T1_3mm_brain.nii']);
-    data=mean(audenv_peakR,3);
-    data((end+1):(61*73*61),:)=0;
-    nii.img=reshape(data,61,73,61);
-    save_nii(nii,[expdir exp '/fmri/nii/wholeBrain/audenv_' role '_peakR.nii']);
-    
-    nii.hdr=load_nii_hdr([expdir 'roi_mask/MNI152_T1_3mm_brain.nii']);
-    data=mean(audenv_peakT,3);
-    data((end+1):(61*73*61),:)=0;
-    nii.img=reshape(data,61,73,61);
-    save_nii(nii,[expdir exp '/fmri/nii/wholeBrain/audenv_' role '_peakT.nii']);
-    
 end
 
 
