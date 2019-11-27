@@ -6,29 +6,34 @@ tic
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
-lags=-10:4;
+lags=-6:-4;
 
 load([expdir '/roi_mask/mor/' 'roi_id_region.mat'],'roi_table');
-exp=experiments{2};
-load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/herd_exps_' num2str(min(lags)) '-' num2str(max(lags)) '.mat'],'b_sl','b_ll','keptT','rnames','lags','herd','herd_p','herd_sig');
+% exp=experiments{2};
+% load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_bined'],'couplingz','keptT','rnames');
+% load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/herd_exps_' num2str(min(lags)) '-' num2str(max(lags)) '.mat'],'b_sl','b_ll','keptT','rnames','lags','herd','herd_p','herd_sig');
 
-  ris=find(ismember(rnames,{'HG_L','vPCUN'}));
+
 % ris=find(sum(herd_sig==0,2)==0);
-for i=1:length(ris);
-    ri=ris(i);
+for ei=3%:4;
+    exp=experiments{ei};
+    load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_bined'],'couplingz','keptT','rnames');
+    cp_ll=nanmean(couplingz,3);
+    cp_ll=cp_ll(:,keptT);
     
-    fsize=[35 20];
-    fig1=figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
-    fig2=figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
-    for ei=1:4;
-        exp=experiments{ei};
-        load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_bined'],'couplingz','keptT','rnames');
-        cp_ll=nanmean(couplingz,3);
-        cp_ll=cp_ll(:,keptT);
+    load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_bined'],'couplingz','keptT');
+    cp_sl=couplingz;
+    cp_sl=cp_sl(:,keptT);
+    
+    ris=find(ismember(rnames,{'aCUN','vPCUN'}));
+    for i=1%:length(ris);
+        ri=ris(i);
         
-        load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_bined'],'couplingz','keptT');
-        cp_sl=couplingz;
-        cp_sl=cp_sl(:,keptT);
+        fsize=[20 17];
+        fig1=figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
+        fig2=figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
+        
+        
         
         rname=rnames{ri};
         

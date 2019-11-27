@@ -7,12 +7,12 @@ close all
 set_parameters;
 
 froidir='mor';
-rname='aANG_R';
+rname='vPCUN';%'ABCshen222';
 sample_gap=4;
 
-fsize=[32 10];
+fsize=[38 10];
 figure('unit','centimeter','paperposition',[0 0 fsize],'position',[0 0 fsize],'papersize',fsize);
-for ei = 4;
+for ei = 1:4;
     exp=experiments{ei};
     load([expdir '/scripts_speaker-listener/' exp '_' rname '_hmm.mat'],'segments');
     % too few segments results in zeros data points for between-segment
@@ -35,7 +35,7 @@ for ei = 4;
     for s=1:size(gdata,3);
         self=gdata(:,:,s);
         C =corr(self);
-        C = (C + C')/2 ;                        % made symmetric
+           % made symmetric
         C(eye(size(C,1))==1)=0;                        % put 1 on the diagonal
         
         for Ki=1:size(segments,1);
@@ -48,7 +48,7 @@ for ei = 4;
             C_between=C(C_withini~=1 & C_sample==1);
             
             if length(C_within)>5 & length(C_between)>5;
-                wbr(Ki,s)= mean(C_within(:))-mean(C_between(:));
+                wbr(Ki,s)= nanmean(C_within(:))-nanmean(C_between(:));
             else
                 wbr(Ki,s)=NaN;
             end
@@ -64,7 +64,8 @@ for ei = 4;
     % segment number is limited by story length.
     % short story with large segment number results in little sample points
     % for within-segment correlation
-    K= find(sum(isnan(wbr),2)<=1);
+    K= find(sum(isnan(wbr(:,sum(~isnan(wbr),1)>1)),2)<1);
+   
     segmentLength =size(gdata,2)*tr(ei)./K;
     
    subplot(1,4,ei)
@@ -82,28 +83,32 @@ for ei = 4;
     ci95=ci(wbr_narm',0.95);
     m=nanmean(wbr_narm,2)';
     
-    ciplot(m-ci95/2,m+ci95/2,segmentLength,'k',0.3);
+    KperMin=K/(tr(ei)*size(gdata,2)/60);
+    
+    ciplot(m-ci95/2,m+ci95/2,KperMin,'k',0.3);
     hold on;
     
-    plot(segmentLength,m,'b','linewidth',1.5);
+    plot(KperMin,m,'b','linewidth',1.5);
     hold off
     grid on
     
     % find segment number with the largest wbr among segment number with
     % wbr significantly larger than zero
     try
-    [mx]=max(m((m-ci95/2)>0));
-    peakK=K(m==mx);
+    [mx,mxi]=max(m-ci95/2);
+    peakK=K(mxi);
+    peakKpermin=KperMin(mxi);
     peak_segmentLength= size(gdata,2)*tr(ei)/peakK;
     catch
         peakK=NaN;
         peak_segmentLength=NaN;
     end
-        title({exp,rname,sprintf('peak segment legnth: %.02f sec', peak_segmentLength) ,sprintf('peak segment number: %d', peakK)}); %
+        title({exp,rname,sprintf('peak segment legnth: %.02f sec', peak_segmentLength) ,sprintf('peak segment number/min: %.2f', peakKpermin)}); %
         
-    xlabel('Segment Length (sec)');
-    ylabel('within- minus between- boundary pattern correlation (r)');
-    xlim([min(segmentLength) max(segmentLength)]);
+    xlabel('Segment Number / min');
+    ylabel({'within- minus between-','boundary pattern correlation (r)'});
+    xlim([min(KperMin) max(KperMin)]);
+    line([min(KperMin) max(KperMin)],[0 0],'color','k','linestyle','--');
     
     %   imagesc(diff(squeeze((segments(peakK,:,:))),1)'); colormap gray
 end

@@ -9,19 +9,22 @@ froidir='mor';
 rnames=dir([expdir '/roi_mask/'  froidir '/mat/*.mat']);
 rnames=strrep({rnames.name},'.mat','');
 
-win_width=25;
-win_step=5;
+win_width=30;
+win_step=1;
 
 for ei=2%1:2;
     exp=experiments{ei};
+     ris=find(ismember(rnames,{'vPCUN'}));
+    % [~,ri]=max(herdm);
     
-    for ri=64;%1:length(rnames);
+    for rii=1:length(ris);
+        ri=ris(rii);
         rname=rnames{ri};
         fl=[expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname  ];
         
         if exist([fl '.mat'])>0;
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname ],'gdata');
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_' rname ],'data');
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname ],'gdata');
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rname ],'data');
             
             if size(gdata,1)>10 & size(data,1)>10;
                 data=zscore(mean(data,1),0,2)';

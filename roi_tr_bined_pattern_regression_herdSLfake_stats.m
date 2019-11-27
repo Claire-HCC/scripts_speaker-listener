@@ -41,7 +41,9 @@ for ei=1:4;
     herdz_null=real(atanh(herd_null));
     herdz_d=(herdz-herdz_null);
     herdz_d_m=nanmean(herdz_d')';
-    [~,herd_p]=ttest([herdz-herdz_null]',0);
+    % think about the ttest again
+    % [~,herd_p]=ttest([herdz-herdz_null]',0);
+    [~,herd_p]=ttest2(herdz',herdz_null','Vartype','unequal')
     
     herd_sig_fdr=zeros(size(herd_p));
     herd_sig_fdr=fdr0(herd_p,0.05);

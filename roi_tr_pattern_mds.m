@@ -1,7 +1,7 @@
 
 clear all;
 tic
-% loc='cluster';
+loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 
@@ -9,13 +9,18 @@ froidir='mor';
 rnames=dir([expdir '/roi_mask/'  froidir '/mat/*.mat']);
 rnames=strrep({rnames.name},'.mat','');
 
-win_width=25;
+win_width=30;
 win_step=1;
+type='correlation';
 
 for ei=3%1:2;
     exp=experiments{ei};
     
-    for ri=find(ismember(rnames,{'LOC_L'}));
+   ris=find(ismember(rnames,{'aCUN'}));
+    % [~,ri]=max(herdm);
+    
+    for rii=1:length(ris);
+        ri=ris(rii);
         rname=rnames{ri};
         fl=[expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname  ];
         
@@ -32,7 +37,7 @@ for ei=3%1:2;
                 
                 temp=[speaker_temp ; gdata_temp];
                 
-                d=pdist(temp,'euclidean');
+                d=pdist(temp,type);
                 mds_dim=2;
                 Y=cmdscale(double(d),mds_dim);
                 
@@ -61,6 +66,7 @@ for ei=3%1:2;
                     
                        xlim([lmin(1) lmax(1)]);
                       ylim([lmin(2) lmax(2)]);
+                      axis off
 %                     xlim([-0.8 0.8]);
 %                     ylim([-0.8 0.8])
 %                     zlim([-0.8 0.8])
@@ -70,9 +76,14 @@ for ei=3%1:2;
                     close gcf
                 end
                 beep
-                pause
-                figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
-                movie(F,1,5)
+                % pause
+                % figure('unit','centimeter','position',[0 0 fsize],'paperposition',[0 0 fsize],'papersize',fsize);
+                % movie(F,1,5)
+                  myVideo = VideoWriter([expdir '/' exp '/fmri/herding_' rname '_mds_' type '.avi']);
+                myVideo.FrameRate = 10;  % Default 30
+                open(myVideo);
+                writeVideo(myVideo,F);
+                close(myVideo)
                 
                 clear data data2 labels labels3
                 %  close all
