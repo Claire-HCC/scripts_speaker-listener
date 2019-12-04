@@ -1,5 +1,5 @@
 tic
-% this scripts takes about 6h
+
 clear all
 
 close all
@@ -7,12 +7,12 @@ close all
 set_parameters;
 
 froidir='mor';
-rname='vPCUN';%'ABCshen222';
-sample_gap=4;
+rname='dPCC';
+sample_gap=5;
 
 fsize=[38 10];
 figure('unit','centimeter','paperposition',[0 0 fsize],'position',[0 0 fsize],'papersize',fsize);
-for ei = 1:4;
+for ei = 4;
     exp=experiments{ei};
     load([expdir '/scripts_speaker-listener/' exp '_' rname '_hmm.mat'],'segments');
     % too few segments results in zeros data points for between-segment
@@ -26,7 +26,7 @@ for ei = 1:4;
     C_sample=zeros(tn,tn);
     
     for ti=1:(tn-sample_gap);
-        C_sample(ti,ti+sample_gap)=1;
+        C_sample(ti,min(ti+sample_gap,tn))=1;
     end
     
     % Within- v.s. Between segment pattern Correlation

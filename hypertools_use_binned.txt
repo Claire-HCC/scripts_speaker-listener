@@ -1,0 +1,61 @@
+# this script save the trasformed and shared feature timeseries based on SRM trained by the whole story
+# spock doesn't have the version of sklearn srm requires.
+# create an custom enviromen and activate it before using srm 
+# conda create -n srmEnv 
+# source activate srmEnv
+# conda install -n srmEnv pip
+module load anacondapy/3.4
+module load pyger
+source activate srmEnv
+python
+
+import hypertools as hyp
+import glob
+import scipy.io
+import os
+import numpy as np
+
+expdir = '/mnt/sink/scratch/claire/speaker-listener/'
+timeUnit='tr'
+froidir='mor';
+exps=['pieman','bronx','merlin','sherlock']
+rname='dPCC'
+
+binSize=20
+binStep=1
+
+for exp in [exps[2]]:
+        fname=glob.glob(os.path.join(expdir + '/' + exp + '/fmri/timeseries/' + timeUnit + '/roi/' + froidir , 'zscore_speaker_'+rname+'.mat'))
+        data_mat=scipy.io.loadmat(fname[0])
+        data=data_mat['data']
+        
+        fname=glob.glob(os.path.join(expdir + '/' + exp + '/fmri/timeseries/' + timeUnit + '/roi/' + froidir , 'zscore_listenerAll_'+rname+'.mat'))
+        data_mat=scipy.io.loadmat(fname[0])
+        gdata=data_mat['gdata']
+        
+        tn=gdata.shape[1]
+        listenerN=gdata.shape[2]
+        voxn=gdata.shape[0]
+        binN= np.linspace(1,(tn-binSize+1),(tn-binSize+1)/binStep).shape[0]
+        
+        data_sl = []
+        for s in range(listenerN):
+            temp=np.empty(shape=[binN, binSize*voxn])
+            
+            for bi in range(binN):
+                keptTi=range((bi*binStep),((bi)*binStep+binSize))
+                temp[bi,:]=gdata[:, keptTi, s].flatten()
+            data_sl.append(temp)
+        
+        temp=np.empty(shape=[binN, binSize*voxn])
+        for bi in range(binN):
+            keptTi=range((bi*binStep),((bi)*binStep+binSize))
+            temp[bi,:]=data[:, keptTi].flatten()
+        
+        data_sl.append(temp)
+            
+        geoMy=hyp.plot(data_sl, reduce='UMAP', ndims=3,show=False,animate='parallel',tail_duration=0.1,save_path='merlin_dPCC_UMAP.mp4') # align='SRM'
+        geoMy.plot(animate='parallel',tail_duration=0.1)
+        
+        geoMy=hyp.plot(data_sl, reduce='MDS', ndims=2,show=False)
+        geoMy.plot(animate=True,tail_duration=0.1)

@@ -4,8 +4,6 @@ function [lagcc] = lagcorr_claire(x,y,lags)
 % negative lag means series x follows, y preceds (lag=-1, corr(x(2:(end)),y(1:(end-1)))).
 
 % quick and dirty function to calculate lagged correlations
-%
-%
 % lagcc = values of correlation coefficients
 %
 % Nblocks = number of blocks into which to divide data, if you want to

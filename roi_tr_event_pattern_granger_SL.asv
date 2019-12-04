@@ -1,0 +1,115 @@
+clear all;
+
+tic
+% loc='cluster';
+set_parameters;
+timeUnit='tr' ;
+froidir='mor';
+% cropt start because ther eis clearly a spech-start effect in the
+% lsiteners' data
+
+lags=-60:-4;
+
+load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
+tic % 15 min
+
+for ei=3;%1:4;
+    exp=experiments{ei};
+    rnames=dir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/'  froidir '/zscore_listenerAll_*.mat']);
+    rnames={rnames.name};
+    rnames=strrep(rnames,'zscore_listenerAll_','');
+    rnames=strrep(rnames,'.mat','');
+    rnames=rnames';
+    rnames=rnames(ismember(rnames,roi_table.region));
+    
+    roi_ids=[];
+    
+    b_l=[];
+    r2_l=[];
+    F_l=[];
+    b_ls=[];
+    r2_ls=[];
+    F_ls=[];
+    
+    b_s=[];
+    r2_s=[];
+    F_s=[];
+    
+    ris=find(ismember(rnames,'vPCUN'))
+    for i=1:length(ris);%1:length(rnames);
+        ri=ris(i);
+        rname=rnames{ri};
+        
+        eventLabels_LG=h5read([expdir   exp '/fmri/hmm/' rname  '_findListenersEventInSpeaker.hdf5'],'///eventLabels_LG');
+        K=length(unique(eventLabels_LG(:,1)));
+        eventLabels_LG(1:(1-min(lags)))=0;
+        eventLabels_LG_kept=unique(eventLabels_LG(eventLabels_LG~=0));
+        
+        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
+        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rname '.mat'],'data');
+        
+        roi_voxn=size(gdata,1);
+        roi_tn=size(gdata,2);
+        
+        g=nanmean(gdata,3);
+        
+        for evi=1:K;
+            keptT=find(eventLabels_LG==evi);
+            
+            if sum(keptT)>0;
+                y=g;
+                y=y(:,keptT);
+                y=y(:);
+                
+                for li=1:length(lags);
+                    Xl(:,:,li)=g(:,keptT+lags(li));
+                    Xs(:,:,li)=data(:,keptT+lags(li));
+                end
+                
+                Xl=reshape(Xl,roi_voxn*length(keptT),length(lags));
+                Xs=reshape(Xs,roi_voxn*length(keptT),length(lags));
+                
+                % centralized X
+                Xl=Xl-mean(Xl);
+                Xs=Xs-mean(Xs);
+                
+                % add an constant
+                
+                [b_l(ri,evi,:),~,r_l,~,stats_l]=regress(y,[ones(size(Xl,1),1)  Xl]);
+                [b_ls(ri,evi,:),~,r_ls,~,stats_ls]=regress(y,[ones(size(Xl,1),1) Xl Xs]);
+                [b_s(ri,evi,:),~,r_s,~,stats_s]=regress(y,[ones(size(Xl,1),1) Xs]);
+                
+                r2_l(ri,evi)=stats_l(1);
+                F_l(ri,evi)=stats_l(2);
+                p_l(ri,evi)=stats_l(3);
+                
+                r2_ls(ri,evi)=stats_ls(1);
+                F_ls(ri,evi)=stats_ls(2);
+                p_ls(ri,evi)=stats_ls(3);
+                
+                r2_s(ri,evi)=stats_s(1);
+                F_s(ri,evi)=stats_s(2);
+                p_s(ri,evi)=stats_s(3);
+                
+                %The numerator of the F-statistic
+                rss_l = r_l(ri,evi)'*r_l(ri,evi);
+                rss_s = r_s(ri,evi)'*r_s(ri,evi);
+                rss_ls = r_ls(ri,evi)'*r_ls(ri,evi);
+                
+                F_num = (rss_l- rss_ls)/length(lags);
+                %The denominator of the F-statistic
+                F_den = rss_ls/(2*length(y)-1);
+                %The F-Statistic
+                F = F_num/F_den;
+                
+            end
+            clear Xl Xs
+            
+        end
+    end
+    save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/granger_SL_event_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b_l','b_ls','b_s','F_l','r2_l','p_ls','F_ls','r2_ls','p_ls','F_s','r2_s','p_s','eventLabels_LG_kept','rnames');
+    % clear b F p r2 rnames coupling
+end
+
+toc
+beep

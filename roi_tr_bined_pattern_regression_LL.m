@@ -13,11 +13,11 @@ tic % 15 min
 % cropt start because ther eis clearly a spech-start effect in the
 % lsiteners' data
 crop_start=10;
-binSize=30; % tr;
+binSize=1; % tr;
 binStep=1;
-
 lags=0;
-for ei=[1 2 4]%1:4;
+
+for ei=3;%[1 2 4]%1:4;
     exp=experiments{ei};
     rnames=dir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/'  froidir '/zscore_listenerAll_*.mat']);
     rnames={rnames.name};
@@ -84,7 +84,7 @@ for ei=[1 2 4]%1:4;
             
         end
     end
-    save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','keptT','y','Y','rnames','-v7.3');
+    save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_LL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','keptT','y','Y','rnames','-v7.3');
     clear b F p r2 rnames coupling
 end
 
