@@ -1,40 +1,28 @@
-
 clear all;
-
+% F-test: https://support.sas.com/rnd/app/ets/examples/granger/index.htm
 tic
 % loc='cluster';
 set_parameters;
 timeUnit='tr' ;
-
 froidir='mor';
 
-exp='merlin';
-load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_dPCC' ],'data');
-crop_start=10;
+load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
+tic % 15 min
 
-roi_voxn=size(data,1);
-roi_tn=size(data,2);
-
-lags=-20:-1;
-
-b=[];
-r=[];
-
-for vi=1:size(data,1);
-    keptT=(abs(min(lags))+1):(roi_voxn-max(lags));
-    % substract the global mean pattern
-    y=data(vi,keptT)';
+for ei=3;%1:4;
+    exp=experiments{ei};
     
-    for li=1:length(lags);
-        X(:,li)=data(vi,keptT+lags(li));
+    rnames=dir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/'  froidir '/zscore_listenerAll_*.mat']);
+    rnames={rnames.name};
+    rnames=strrep(rnames,'zscore_listenerAll_','');
+    rnames=strrep(rnames,'.mat','');
+    rnames=rnames';
+    rnames=rnames(ismember(rnames,roi_table.region));
+    
+    for ri=1:length(rnames);
+      
+        rname=rnames{ri};
+        eventLabels_LG(ri,:)=h5read([expdir   exp '/fmri/hmm/findListenersEventInSpeaker/' rname  '.hdf5'],'///eventLabels_LG');
+      
     end
-    
-    % centralized X
-    X=X-mean(X);
-    
-    % add an constant
-    X=[ones(size(X,1),1) X];
-    
-    [b(vi,:),~,r(vi,:)]=regress(y,X);
-    clear X y
 end

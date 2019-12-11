@@ -8,7 +8,7 @@ froidir='mor';
 % cropt start because ther eis clearly a spech-start effect in the
 % lsiteners' data
 iters=1000;
-lags=-60:-4; % how to determine lags?
+lags=-10:-1; % how to determine lags?
 
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 tic % 15 min

@@ -1,91 +1,77 @@
-clear all;
-
+function roi_tr_bined_pattern_regression_LL(binSizei)
+loc='cluster';
 tic
- loc='cluster';
 set_parameters;
 timeUnit='tr' ;
-
+exp='merlin';
 froidir='mor';
 
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
-tic % 15 min
+rnames=table2array(roi_table(:,3));
+ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
+rnames=rnames(ris);
 
 % cropt start because ther eis clearly a spech-start effect in the
-% lsiteners' data
-crop_start=10;
-binSize=1; % tr;
-binStep=1;
+% listeners' data
+binSize_tested=[10 15 30]; % tr;
 lags=0;
 
-for ei=3;%[1 2 4]%1:4;
-    exp=experiments{ei};
-    rnames=dir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/'  froidir '/zscore_listenerAll_*.mat']);
-    rnames={rnames.name};
-    rnames=strrep(rnames,'zscore_listenerAll_','');
-    rnames=strrep(rnames,'.mat','');
-    rnames=rnames';
-    rnames=rnames(ismember(rnames,roi_table.region));
+binSize=binSize_tested(binSizei);
+
+for ri=1:length(rnames);
+    clear data_mat
+    rname=rnames{ri};
     
-    b=[];
-    roi_ids=[];
-    r2=[];
-    F=[];
+    load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
+    roi_voxn=size(gdata,1);
+    tn=size(gdata,2);
+    listeners=1:size(gdata,3);
     
-    for ri=1:length(rnames);
-        clear data_mat
-        rname=rnames{ri};
+    for s=listeners;
+        othersi=listeners(listeners~=s);
+        others=nanmean(gdata(:,:,othersi),3);
+        self=gdata(:,:,s);
         
-        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
-        
-        roi_voxn=size(gdata,1);
-        roi_tn=size(gdata,2);
-        
-        keptT=(abs(min(lags))+1+crop_start):(roi_tn-max([lags, 0])-binSize+1);
-        binN=length(1:binStep:(length(keptT)-binSize+1));
-        
-        listeners=1:size(gdata,3);
-        for s=listeners;
+        for t=1:tn;
+            t_bin=t:(t+binSize-1);
             
-            othersi=listeners(listeners~=s);
-            others=nanmean(gdata(:,:,othersi),3);
-            self=gdata(:,:,s);
-            
-            for bi=1:binN;
-                keptTi=((bi-1)*binStep+1):((bi-1)*binStep+binSize);
+            if min(t_bin)+min(lags)>=1 & t_bin+max(lags)<=tn & max(t_bin)<=tn;
                 
                 y=others;
-                y=y(:,keptT(keptTi));
+                y=y(:,t_bin);
                 y=y(:);
                 
                 for li=1:length(lags);
-                    X(:,:,li)=self(:,keptT(keptTi)+lags(li));
+                    X(:,:,li)=self(:,t_bin+lags(li));
                 end
                 
-                X=reshape(X,roi_voxn*length(keptTi),length(lags));
+                X=reshape(X,roi_voxn*length(t_bin),length(lags));
                 
                 % centralized X
                 X=X-mean(X);
                 
-                % add an constant
-                X=[ones(size(X,1),1) X];
+                [b(ri,t,:,s),~,~,~,stats]=regress(y,[ones(size(X,1),1) X]);
                 
-                [b(ri,:,s),~,~,~,stats]=regress(y,X);
+                r2(ri,t,s)=stats(1);
+                F(ri,t,s)=stats(2);
+                p(ri,t,s)=stats(3);
                 
-                r2(ri,keptT(keptTi),s)=stats(1);
-                F(ri,keptT(keptTi),s)=stats(2);
-                p(ri,keptT(keptTi),s)=stats(3);
-                
-                Y=X*b(ri,:,s)';
-                Y=reshape(Y,roi_voxn,length(keptTi));
-                y=reshape(y,roi_voxn,length(keptTi));
-                
-                clear X
+            else
+                b(ri,t,s)=nan;
+                r2(ri,t,s)=nan;
+                F(ri,t,s)=nan;
+                p(ri,t,s)=nan;
             end
-            
+            clear X y
         end
     end
-    save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_LL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','keptT','y','Y','rnames','-v7.3');
-    clear b F p r2 rnames coupling
+    disp(ri)
 end
+save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_LL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','-v7.3');
 
 toc
+
+
+
+
+
