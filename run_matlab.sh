@@ -3,9 +3,9 @@
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
 #SBATCH -t 03:00:00
-#SBATCH -c 10
-#SBATCH --array=2-3
-#SBATCH --mem-per-cpu=1G
+#SBATCH -c 15
+#SBATCH --array=1-1128
+#SBATCH --mem-per-cpu=100M
 
 
 module load matlab
@@ -14,16 +14,23 @@ expdir="/mnt/sink/scratch/claire/speaker-listener/"
 
 # fs=`ls $expdir/$exp/fmri/timeseries/tr/roi/mor/zscore_listenerAll_*.mat`
 
-lagi=$SLURM_ARRAY_TASK_ID
-declare -i lagi
+perm=$SLURM_ARRAY_TASK_ID
+declare -i perm
 
-binSizei=$SLURM_ARRAY_TASK_ID
-declare -i binSizei
 
-# matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL($lagi)"
-matlab -nodisplay -r "roi_tr_bined_pattern_regression_LL($binSizei)"
+# matlab -nodisplay -r "roi_tr_pattern_regression_SL_lagSelection($perm)"
+matlab -nodisplay -r "roi_tr_pattern_regression_LL_lagSelection($perm)"
+# matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
+# matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
 
-# matlab ./roi_tr_bined_pattern_granger_SL.m $lagi
+# matlab -nodisplay -r "roi_tr_pattern_regression_LL_permPhase($perm)"
+
+
+# matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"
+# matlab -nodisplay -r "roi_tr_bined_pattern_regression_LL_permSubj($s)"
+
+
+
 
 
 

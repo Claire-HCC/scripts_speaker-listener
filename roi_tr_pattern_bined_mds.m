@@ -1,4 +1,3 @@
-%б@всврв█бH
 clear all;
 tic
 loc='cluster';

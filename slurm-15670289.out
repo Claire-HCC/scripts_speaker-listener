@@ -1,0 +1,44 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+[Warning: Unable to load Toolbox Path Cache
+/usr/people/huichuan/.matlab/R2018a/toolbox_cache-9.4.0-3522712608-glnxa64.xml.
+The cache file is not in the correct format. It will be regenerated upon
+quitting MATLAB.] 
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Name is nonexistent or not a directory:
+/mnt/sink/scratch/claire/speaker-listener/scripts_speaker-listener/Y] 
+[> In path (line 109)
+  In addpath (line 96)
+  In set_parameters (line 15)
+  In roi_tr_pattern_regression_LL_lagSelection (line 4)] 
+[Warning: Name is nonexistent or not a directory:
+/claire/speaker-listener/scripts_speaker-listener] 
+[> In path (line 109)
+  In addpath (line 96)
+  In set_parameters (line 15)
+  In roi_tr_pattern_regression_LL_lagSelection (line 4)] 
+{Error using load
+Unable to read file
+'Y:/claire/speaker-listener/roi_mask/mor/roi_id_region.mat'. No such file or
+directory.
+
+Error in roi_tr_pattern_regression_LL_lagSelection (line 7)
+load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
+} 

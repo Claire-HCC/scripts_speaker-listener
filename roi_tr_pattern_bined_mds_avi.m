@@ -1,4 +1,4 @@
-%б@всврв█бH
+
 clear all;
 tic
 % loc='cluster';
@@ -9,7 +9,7 @@ froidir='mor';
 rnames=dir([expdir '/roi_mask/'  froidir '/mat/*.mat']);
 rnames=strrep({rnames.name},'.mat','');
 
-binSize=20;% tr;
+binSize=10;% tr;
 binStep=1;
 
 type='corr';

@@ -1,0 +1,2 @@
+/var/spool/slurmd/job15668187/slurm_script: line 21: syntax error near unexpected token `perm'
+/var/spool/slurmd/job15668187/slurm_script: line 21: `roi_tr_pattern_regression_SL_lagSelection(perm)'
