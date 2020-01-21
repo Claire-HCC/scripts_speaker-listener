@@ -23,6 +23,7 @@ for ei=1:4;
     roi_ids=[];
     r2=[];
     F=[];
+    
     for ri=1:length(rnames);
         clear data_mat
         rname=rnames{ri};

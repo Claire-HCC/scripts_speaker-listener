@@ -7,7 +7,7 @@ froidir='mor';
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 crop_start=10;
 
-for ei=[ 2 1];%
+for ei=[ 4];%
     exp=experiments{ei};
     rnames=table2array(roi_table(:,3));
     ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);

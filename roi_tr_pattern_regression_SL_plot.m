@@ -19,7 +19,7 @@ for ei=1:4;
     ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
     rnames=rnames(ris);
     
-load([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_betaStats.mat'],'b_real','b_null','b_p','b_t','lags','rnames','keptT','b_sig_fdr_s','b_sig_fdr_l');
+load([expdir '/' exp '/fmri/pattern_reression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_betaStats.mat'],'b_real','b_null','b_p','b_t','lags','rnames','keptT','b_sig_fdr_s','b_sig_fdr_l');
 
 subplot(2,4,ei)
 % normalization over lags, so to see consistent patters across rois, even

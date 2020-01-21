@@ -1,0 +1,45 @@
+clear all;
+
+tic
+% loc='cluster';
+set_parameters;
+timeUnit='tr' ;
+froidir='mor';
+
+binSize_tested=[10 15 30]; % tr;
+lags_tested={ -10:-4, -20:-4, -30:-4, -10:-1};
+load([expdir '/roi_mask/mor/' 'roi_id_region.mat'],'roi_table');
+
+for binSizei=1:length(binSize_tested);
+    binSize=binSize_tested(binSizei);
+    
+    for lagi=1:length(lags_tested);
+        lags=lags_tested{lagi};
+        for ei=3;%1:4;
+            exp=experiments{ei};
+            
+            exp=experiments{ei};
+            
+            load([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_LL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'couplingz','rnames','keptT','b','r2');
+            r2_ll=nanmean(r2,3);
+            
+            load([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/regression_SL_bin' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','couplingz','rnames','keptT','lags','r2');
+            r2_sl=r2;
+            
+            herd(:,1)=corr_col(r2_sl(:,:)',r2_ll(:,:)');
+            
+              subplot(4,1,ei)
+        % boxplot(herd_null_z');
+        scatter(repmat(1:57,1,48),herd_null_z(:),20,'k','filled','MarkerFaceAlpha',.2);
+        hold on
+        scatter(1:57,herd_z,40,'r','filled')
+        set(gca,'xtick',1:57,'xticklabels',rnames);
+        xtickangle(45)
+        xlim([0 57]);
+        ylabel(exp)
+            
+        end
+        
+    end
+end
+

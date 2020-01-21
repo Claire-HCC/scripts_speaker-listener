@@ -8,7 +8,7 @@ load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 crop_start=10;
 perms=153;
 
-for ei=3;%
+for ei=[1:4 ];%
     exp=experiments{ei};
     rnames=table2array(roi_table(:,3));
     ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
@@ -36,5 +36,10 @@ for ei=3;%
         end
     end
     save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_LL_lagSelection_stats'  ],'lags','rnames','r2_test_all','lags_peak','t');
+    figure 
+   hist(lags_peak);
+   title(exp)
+
+    clear r2_test_all r2_train_all
 end
 

@@ -8,13 +8,13 @@ load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 crop_start=10;
 lags_tested={-10:10, -20:20, -30:30, -10:-4, -20:-4, -30:-4, -10:-1};
 
-for ei=1:4;;%
+for ei=1;%[1:4];;%
     exp=experiments{ei};
     rnames=table2array(roi_table(:,3));
     ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
     rnames=rnames(ris);
     
-    for lagi=4:length(lags_tested);
+    for lagi=1:length(lags_tested);
         lags=lags_tested{lagi};
         
         for ri=1:length(rnames);
@@ -62,7 +62,7 @@ for ei=1:4;;%
         end
         
         save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
-        clear b F p r2 
+        clear b F p r2 r2_byTime
     end
 end
 

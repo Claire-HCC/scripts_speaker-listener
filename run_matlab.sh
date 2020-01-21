@@ -4,7 +4,7 @@
 #SBATCH -p all
 #SBATCH -t 03:00:00
 #SBATCH -c 15
-#SBATCH --array=1-1128
+#SBATCH --array=1-153
 #SBATCH --mem-per-cpu=100M
 
 

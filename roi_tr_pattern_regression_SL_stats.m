@@ -9,9 +9,9 @@ load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 tic % 15 min
 % cropt start because ther eis clearly a spech-start effect in the
 % lsiteners' data
-lags_tested={-10:-4,-20:-4, -30:-4, -10:-1};
+lags_tested={-10:10, -20:20, -30:30, -10:-4, -20:-4, -30:-4, -10:-1};
 
-for ei=3;%1:4;
+for ei=3:4;%1:4;
     exp=experiments{ei};
     rnames=table2array(roi_table(:,3));
     ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
@@ -46,6 +46,7 @@ for ei=3;%1:4;
             r2_t(ri,1)=-stats.tstat;
         end
         r2_sig_fdr=(fdr0(r2_p,0.05)==1);
+        r2_sig_fwe=nan(size(r2_p));
         r2_sig_fwe(r2_t>0)=(p(r2_t>0)<(0.05/sum(r2_t>0)));
         
         r2_byTime_p=nan(size(r2_byTime));
@@ -64,23 +65,24 @@ for ei=3;%1:4;
         
         b_p=nan(size(b_real));
         b_sig_fdr=nan(size(b_p));
+        b_sig_fwe=nan(size(b_p));
+        b_t=nan(size(b_p));
         for ri=1:length(rnames);
             for li=1:length(lags);
                 [~,b_p(ri,li),~,stats]=ttest(squeeze(b_null(ri,li,:))',b_real(ri,li),'tail','left');
                 b_t(ri,li)=-stats.tstat;
-                if r2_sig_fdr(ri)==1;
-                    b_sig_fdr(ri,:)=(fdr0(b_p(ri,:),0.05)==1);
-                end
+                b_sig_fdr(ri,:)=(fdr0(b_p(ri,:),0.05)==1);
             end
         end
         
         for ri=1:length(rnames);
             if r2_sig_fdr(ri)==1;
                 b_sig_fdr(ri,:)=(fdr0(b_p(ri,:),0.05)==1);
+                b_sig_fwe(ri,:)=((b_p(ri,:)<(0.05/length(lags)))==1);
             end
         end
         
-        save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_stats.mat'],'b_real','b_null','b_p','b_t','b_sig_fdr','r2_p',...
+        save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_stats.mat'],'b_real','b_null','b_p','b_t','b_sig_fdr','b_sig_fwe','r2_p',...
             'r2_t','r2_sig_fdr','r2_sig_fwe','r2_byTime_p','r2_byTime_t','r2_byTime_sig_fdr','lags','rnames','keptT','r2_byTime_null','r2_byTime_real');
         
         
@@ -89,7 +91,7 @@ for ei=3;%1:4;
         nii=roiTable2wholeBrainNii_mor([roi_ids, r2_t(r2_sig_fwe==1)]);
         save_nii(nii,[expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags))  '_r2_tmap_fwe.nii']);
         
-        clear b_null b_real beta_p F_real F_null b_t b_p
+        clear b_real b_null b_p b_t b_sig_fdr b_sig_fwe r2_p r2_t r2_sig_fdr r2_sig_fwe r2_byTime_p r2_byTime_t r2_byTime_sig_fdr r2_byTime_null r2_byTime_real F_null
     end
 end
 
