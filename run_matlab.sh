@@ -3,9 +3,9 @@
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
 #SBATCH -t 03:00:00
-#SBATCH -c 15
-#SBATCH --array=1-153
-#SBATCH --mem-per-cpu=100M
+#SBATCH -c 10
+#SBATCH --array=1-1000
+#SBATCH --mem-per-cpu=2G
 
 
 module load matlab
@@ -19,11 +19,12 @@ declare -i perm
 
 
 # matlab -nodisplay -r "roi_tr_pattern_regression_SL_lagSelection($perm)"
-matlab -nodisplay -r "roi_tr_pattern_regression_LL_lagSelection($perm)"
+# matlab -nodisplay -r "roi_tr_pattern_regression_LL_lagSelection($perm)"
 # matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
 # matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
 
-# matlab -nodisplay -r "roi_tr_pattern_regression_LL_permPhase($perm)"
+matlab -nodisplay -r "wholeBrain_phasePerm($perm)"
+# matlab -nodisplay -r "wholeBrain_tr_temporal_regression_SL_permPhase($perm)"
 
 
 # matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"

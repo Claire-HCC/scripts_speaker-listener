@@ -1,0 +1,43 @@
+https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2011-March/017668.html
+%% rconstruct mni152. Once is enough.
+% recon-all -all -i MNI152_T1_3x3x4mm_brain.nii -s $SUBJECT
+% get the registration file from mni152 volume to mni152 surface
+bbregister --mov /scratch/claire/speaker-listener/roi_mask/MNI152_T1_3x3x4mm_brain_mask.nii --t1 \
+    --s $SUBJECT \
+    --reg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat
+
+% for one overlay
+% reconstruct the MNI 3mm brain
+SUBJECTS_DIR='/scratch/claire/ABC/fMRI/roi_mask'
+SUBJECT='FreeSurfer_MNI152_T1_3mm'
+
+% don not forget to use 3x3x4mm surface when freesufer is done with recon-all
+f='herdt_regression_binSize10_lag-10--4_fdr'
+
+% cd to the folder with the functional image
+% trsform the volumetric functional image into suface image
+mri_vol2surf --src $f'.nii' --srcreg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $f'.nii' --srcreg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
+
+% show it with tksurfer and save it
+% I don't know why, but I have to run tksurfer first and wait the gui to come out before running the rest of the scripts.
+tksurfer -overlay $f"_lh.mgh" $SUBJECT lh inflated -fminmax 2 15 -fthresh 2
+set f "herdt_regression_binSize10_lag-10--4_fdr"
+save_tiff "${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${f}_lh_m.tif"
+exit
+
+
+tksurfer -overlay $f"_rh.mgh" $SUBJECT rh inflated -fminmax 2 15 -fthresh 2
+set f "herdt_regression_binSize10_lag-10--4_fdr"
+save_tiff "${f}_rh_l.tif"
+rotate_brain_y 180
+set colscalebarflag 1
+redraw 
+save_tiff "${f}_rh_m.tif"
+exit
+  
+
+

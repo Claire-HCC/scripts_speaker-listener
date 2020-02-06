@@ -1,0 +1,100 @@
+https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2011-March/017668.html
+%% rconstruct mni152. Once is enough.
+% recon-all -all -i MNI152_T1_3mm_brain.nii -s $SUBJECT
+% get the registration file from mni152 volume to mni152 surface
+% bbregister --mov $SUBJECTS_DIR/MNI152_T1_3mm_brain.nii --t1 \
+%    --s $SUBJECT \
+%    --reg $SUBJECTS_DIR/$SUBJECT/register.dat
+
+% for one overlay
+% reconstruct the MNI 3mm brain
+SUBJECTS_DIR='/scratch/claire/ABC/fMRI/roi_mask'
+SUBJECT='FreeSurfer_MNI152_T1_3mm'
+f='mp_simz_qmax05_pos_mask'
+
+% cd to the folder with the functional image
+% trsform the volumetric functional image into suface image
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
+
+mri_cor2label --i $f'_rh'.mgh --surf $SUBJECT rh --id 1 --l ./$f'_rh.label'                                                                                                                              
+mri_cor2label --i $f'_lh.mgh' --surf $SUBJECT lh --id 1 --l ./$f'_lh.label'         
+
+mris_label2annot --s $SUBJECT --h lh --ctab ctab.txt --a visualwang2014 --l mp_simz_qmax05_pos_mask_lh.label --l V1V2V3V4_lh.label --l V3ab_lh.label --l LO_lh.label --l VO_PHC_lh.label --l IPS_lh.label --nhits nhits.mgh 
+mris_label2annot --s $SUBJECT --h rh --ctab ctab.txt --a visualwang2014 --l mp_simz_qmax05_pos_mask_rh.label --l V1V2V3V4_rh.label --l V3ab_rh.label --l LO_rh.label --l VO_PHC_rh.label --l IPS_rh.label --nhits nhits.mgh 
+
+
+% show it with tksurfer and save it
+% I don't know why, but I have to run tksurfer first and wait the gui to come out before running the rest of the scripts.
+tksurfer $SUBJECT lh inflated 
+save_tiff lh_l.tif
+rotate_brain_y 90
+redraw 
+save_tiff lh_p.tif
+rotate_brain_y 90
+redraw 
+save_tiff lh_m.tif
+rotate_brain_x 90
+redraw 
+save_tiff lh_bottum.tif
+exit
+
+tksurfer $SUBJECT rh inflated 
+save_tiff rh_l.tif
+rotate_brain_y 90
+redraw 
+save_tiff rh_p.tif
+rotate_brain_y 90
+redraw 
+save_tiff rh_m.tif
+rotate_brain_x 90
+redraw 
+save_tiff rh_bottum.tif
+exit
+
+
+--------------------------
+for roi_label in $(seq -f "%03g" 2 268)
+do
+f=roi$roi_label
+mri_vol2surf --src $f'.img' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $f'.img' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
+
+mri_cor2label --i $f'_rh.mgh' --surf $SUBJECT rh --id 1 --l ./$f'_rh.label'                                                                                                                   
+mri_cor2label --i $f'_lh.mgh' --surf $SUBJECT lh --id 1 --l ./$f'_lh.label'       
+done
+
+for roi_label in $(seq -f "%03g" 13)
+do
+f=roi$roi_label
+mris_label2annot --s $SUBJECT --h rh --ctab ctab.txt --a $f --l $f'_rh.label' 
+mris_label2annot --s $SUBJECT --h lh --ctab ctab.txt --a $f --l $f'_lh.label'
+done
+
+
+for roi_label in 5    13    30    50    83   138   142   144   159   219
+do
+f=`printf 'roi%03g' $roi_label`
+mris_label2annot --s $SUBJECT --h lh --ctab ctab2.txt --a $f --l $f'_lh.label'
+mris_label2annot --s $SUBJECT --h rh --ctab ctab2.txt --a $f --l $f'_rh.label' 
+done
+
+mris_label2annot --s $SUBJECT --h lh --ctab ctab2.txt --a isfcVSstorylineEffect --l roi219_lh.label --l roi138_lh.label --l roi142_lh.label --l roi144_lh.label --l roi159_lh.label --l roi140_lh.label
+mris_label2annot --s $SUBJECT --h rh --ctab ctab3.txt --a isfcVSstorylineEffect --l roi219_rh.label --l roi005_rh.label --l roi013_rh.label --l roi030_rh.label --l roi050_rh.label --l roi083_rh.label 
+
+tksurfer $SUBJECT lh inflated -annot lh.isfcVSstorylineEffect.annot -curv -gray 
+set f "isfcVSstorylineEffect"
+save_tiff "${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${f}_lh_m.tif"
+exit
+
+tksurfer $SUBJECT rh inflated -annot rh.isfcVSstorylineEffect.annot -curv -gray 
+set f "isfcVSstorylineEffect"
+save_tiff "${f}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${f}_rh_m.tif"
+exit
+

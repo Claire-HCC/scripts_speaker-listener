@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH -J 'matlab_perSubj'
+#SBATCH -J 'matlab_permSubj'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 01:00:00
-#SBATCH -c 5
+#SBATCH -t 10:00:00
+#SBATCH -c 10
 #SBATCH --array=1-48
 #SBATCH --mem-per-cpu=500M
 
@@ -19,16 +19,14 @@ declare -i perm
 
 
 # matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
-# matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
 
-matlab -nodisplay -r "roi_tr_bined_pattern_regression_SL_permSubj($perm)"
-
+# matlab -nodisplay -r "roi_tr_pattern_regression_SLeach_perm($perm)"
 
 # matlab -nodisplay -r "roi_tr_pattern_regression_LL_permPhase($perm)"
 
 
 # matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"
-# matlab -nodisplay -r "roi_tr_bined_pattern_regression_LL_permSubj($s)"
+matlab -nodisplay -r "roi_tr_bined_pattern_regression_SL_permSubj($perm)"
 
 # sqeueu -u huichuan
 # scancel <jobid>

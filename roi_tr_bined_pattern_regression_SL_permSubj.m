@@ -13,7 +13,7 @@ tic % 15 min
 % cropt start because there is clearly a speech-start effect in the
 % listeners' data
 
-for ei=[1 2 4];%1:4;
+for ei= 1:4;
     exp=experiments{ei};
     
     rnames=table2array(roi_table(:,3));
@@ -23,10 +23,10 @@ for ei=[1 2 4];%1:4;
     load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rnames{1} '.mat'],'data');
     tn=size(data,2);
     
-    for binSizei=3;%1:length(binSize_tested);
+    for binSizei=1:length(binSize_tested);
         binSize=binSize_tested(binSizei);
         
-        for lagi=3;%1:length(lags_tested);
+        for lagi=1:length(lags_tested);
             lags=lags_tested{lagi};
             
             b=[];
@@ -80,7 +80,7 @@ for ei=[1 2 4];%1:4;
                 end
             end
             
-            save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/perm/regression_SL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) '_perm' num2str(perm)],'b','F','r2','p','lags','rnames','binSize');
+            save([expdir '/' exp '/fmri/pattern_regression_bined/' timeUnit '/roi/' froidir '/SLg/perm/regression_SL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) '_perm' num2str(perm)],'b','F','r2','p','lags','rnames','binSize');
             clear b F p r2 coupling r
         end
     end

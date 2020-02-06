@@ -1,32 +1,37 @@
-clear all;
+function roi_tr_pattern_regression_LL(ei)
 
-tic
 loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
+rnames=table2array(roi_table(:,3));
 crop_start=10;
-lags_tested={-10:10, -20:20, -30:30, 0:0};
+lags_tested={-10:10, 0:0};
 
-for ei=2:4;
-    exp=experiments{ei};
-    rnames=table2array(roi_table(:,3));
-    ris=find(cellfun(@(x) exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' x '.mat' ]),rnames)>0);
-    rnames=rnames(ris);
+% for ei=1;%2:4;
+exp=experiments{ei};
+
+for lagi=1:length(lags_tested);
+    lags=lags_tested{lagi};
     
-    for lagi=1:length(lags_tested);
-        lags=lags_tested{lagi};
-        
-        for ri=1:length(rnames);
-            clear data_mat
-            rname=rnames{ri};
-            
+    load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rnames{1} '.mat' ],'gdata')
+    [~ ,tn ,subjn]=size(gdata);
+    
+    b=nan([length(rnames) length(lags)+1 subjn]);
+    r2=nan([length(rnames)  subjn]);
+    F=nan([length(rnames)  subjn]);
+    p=nan([length(rnames) subjn]);
+    r2_byTime=nan([length(rnames),tn, subjn]);
+    
+    for ri=1:length(rnames);
+        rname=rnames{ri};
+        disp(ri)
+        if    exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ]);
             load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
             
             roi_voxn=size(gdata,1);
-            roi_tn=size(gdata,2);
-            keptT=(abs(min(lags))+1+crop_start):(roi_tn-max([lags,0]));
+            keptT=(abs(min(lags))+1+crop_start):(tn-max([lags,0]));
             
             for s=1:size(gdata,3)
                 othersi=1:size(gdata,3);
@@ -59,18 +64,18 @@ for ei=2:4;
                 
                 ssr=sum(rmat.^2);
                 sst=sum((ymat-mean(y)).^2);
-                r2_byTime(ri,:,s)=nan(roi_tn,1);
+                r2_byTime(ri,:,s)=nan(tn,1);
                 r2_byTime(ri,keptT,s)=1-ssr./sst;
                 
                 clear X
                 
             end
         end
-        
-        save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
-        clear b F p r2 r2_byTime
     end
+    save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/LLselfother/regression_LL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
     
+    clear b F p r2 r2_byTime
 end
+% end
 
-toc
+

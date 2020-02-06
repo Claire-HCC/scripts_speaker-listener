@@ -14,7 +14,7 @@ win_step=1;
 
 for ei=2%1:2;
     exp=experiments{ei};
-     ris=find(ismember(rnames,{'vPCUN'}));
+    ris=find(ismember(rnames,{'vPCUN'}));
     % [~,ri]=max(herdm);
     
     for rii=1:length(ris);
@@ -23,8 +23,8 @@ for ei=2%1:2;
         fl=[expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname  ];
         
         if exist([fl '.mat'])>0;
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname ],'gdata');
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rname ],'data');
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname ],'gdata');
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_' rname ],'data');
             
             if size(gdata,1)>10 & size(data,1)>10;
                 data=zscore(mean(data,1),0,2)';
@@ -79,6 +79,7 @@ for ei=2%1:2;
                     ylim([min(Y(:,2)) max(Y(:,2))]);
                     %   xlim([-10 10]);
                     %    ylim([-10 10])
+                    axis off
                     F(fn) = getframe(f);
                     fn=fn+1;
                     
@@ -87,6 +88,12 @@ for ei=2%1:2;
                 figure('unit','centimeter','position',[2 2 fsize],'paperposition',[2 2 fsize],'papersize',fsize);
                 %  movie(F,1,10)
                 %   save( [expdir '/' exp '/fmri/iscWin/' timeUnit '/roi/' froidir '/' rname '_mds.mat'],'Y','stress','disparities','speaker_cord','listener_cord');
+                myVideo = VideoWriter([expdir '/' exp '/fmri/herding_' rname '_mds_euclidean.avi']);
+                myVideo.FrameRate = 10;  % Default 30
+                open(myVideo);
+                writeVideo(myVideo,F);
+                close(myVideo)
+                
                 clear data data2 labels labels3
                 %  close all
             end
