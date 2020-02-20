@@ -11,7 +11,7 @@ lags_tested={-10:10, -20:20, -30:30, -10:-4, -20:-4, -30:-4, -10:-1};
 
 rnames_selected={'dPCUN'};
 figure;
-for ei=[1:4];%[1:4];;%
+for ei=[3];%[1:4];;%
     exp=experiments{ei};
     
     for lagi=1%:length(lags_tested);
@@ -23,7 +23,7 @@ for ei=[1:4];%[1:4];;%
         for ri=1:length(rnames);
             rname=rnames{ri};
             
-            if ismember(rname,rnames_selected);
+          %  if ismember(rname,rnames_selected);
                 %  if sig_betaClass(ri)==1;
                 
                 b_s_temp=squeeze(b_s(ri,:,:))';
@@ -44,7 +44,7 @@ for ei=[1:4];%[1:4];;%
                 end
             end
             
-        end
+    %    end
     end
 end
 

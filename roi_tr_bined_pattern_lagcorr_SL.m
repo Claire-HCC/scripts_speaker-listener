@@ -5,8 +5,8 @@ loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
-binSize_tested=[10 15 30]; % tr;
-lags_tested={-3:3,0,-10:10 -10:-4, -20:-4, -30:-4, -10:-1};
+binSize_tested=[40]; % tr;
+lags_tested={-10:10 , -30:30};
 
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 rnames=table2array(roi_table(:,3));
@@ -20,16 +20,14 @@ for ei=1:4;
     load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rnames{1} '.mat'],'data');
     tn=size(data,2);
     
-    for binSizei=1%:length(binSize_tested);
+    for binSizei=1:length(binSize_tested);
         binSize=binSize_tested(binSizei);
         
-        for lagi=1%:length(lags_tested);
+        for lagi=2;%1:length(lags_tested);
             lags=lags_tested{lagi};
             
-            b=nan([length(rnames),tn,length(lags)+1]);
-            r2=nan([length(rnames) tn]);
-            F=nan([length(rnames) tn]);
-            p=nan([length(rnames) tn]);
+            r=nan([length(rnames) tn  length(lags) ]);
+            
             
             for ri=1:length(rnames);
                 rname=rnames{ri};
@@ -47,33 +45,18 @@ for ei=1:4;
                         if min(t_bin)+min(lags)>=1 & t_bin+max(lags)<=tn & max(t_bin)<=tn;
                             % substract the global mean pattern
                             y=g(:,t_bin);
-                            y=y(:);
+                            x=data(:,t_bin);
                             
-                            for li=1:length(lags);
-                                X(:,:,li)=data(:,t_bin+lags(li));
-                            end
+                            [r(ri,t,:) ]=lagcorr_spatialTemporal(y,x,lags);
                             
-                            X=reshape(X,roi_voxn*length(t_bin),length(lags));
-                            
-                            % centralized X
-                            X=X-mean(X);
-                            
-                            % add an constant
-                            [b(ri,t,:),~,~,~,stats]=regress(y,[ones(size(X,1),1) X]);
-                            
-                            r2(ri,t)=stats(1);
-                            F(ri,t)=stats(2);
-                            p(ri,t)=stats(3);
-                            
-                            clear X
+                            clear x y
                         end
                     end
                 end
             end
-            save(sprintf('%s/%s/fmri/pattern_regression_bined/%s/roi/%s/SLg/regression_SL_binSize%d_lag%d-%d',expdir, exp, timeUnit, froidir, binSize, min(lags),max(lags)),'b','F','r2','p','lags','rnames','binSize');
-            
-
-            clear b F p r2
+            mkdir([expdir '/' exp '/fmri/pattern_lagcorr_bined/' timeUnit '/roi/' froidir '/SLg/perm/']);
+            save([expdir '/' exp '/fmri/pattern_lagcorr_bined/' timeUnit '/roi/' froidir '/SLg/SL_binSize' num2str(binSize) '_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'r','rnames','binSize','lags');
+            clear r
         end
     end
 end

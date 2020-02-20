@@ -2,7 +2,7 @@
 #SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 03:00:00
+#SBATCH -t 3:0:00
 #SBATCH -c 10
 #SBATCH --array=1-1000
 #SBATCH --mem-per-cpu=2G
@@ -23,8 +23,7 @@ declare -i perm
 # matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
 # matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
 
-matlab -nodisplay -r "wholeBrain_phasePerm($perm)"
-# matlab -nodisplay -r "wholeBrain_tr_temporal_regression_SL_permPhase($perm)"
+matlab -nodisplay -r "wholeBrain_tr_temporal_lagcorr_SLg_permPhase($perm)"
 
 
 # matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"

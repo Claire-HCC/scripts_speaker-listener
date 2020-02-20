@@ -2,7 +2,7 @@
 #SBATCH -J 'matlab_permSubj'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 10:00:00
+#SBATCH -t 1:00:00
 #SBATCH -c 10
 #SBATCH --array=1-48
 #SBATCH --mem-per-cpu=500M

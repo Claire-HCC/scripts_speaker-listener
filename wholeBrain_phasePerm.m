@@ -4,7 +4,7 @@ loc='cluster';
 set_parameters;
 rng(perm)
 
-for ei=3;%1:2;%1:4;
+for ei=[1 2 4];%1:2;%1:4;
     exp=experiments{ei};
     clear data
     f= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/speaker.mat',expdir,exp);

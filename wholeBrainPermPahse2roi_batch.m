@@ -1,6 +1,6 @@
 clear all;
 
-% loc='cluster';
+loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 
@@ -10,10 +10,10 @@ rnames=table2array(roi_table(:,3));
 
 tic % 15 min
 
-for ei=3;%1:2;%1:4;
+for ei=[2 4];%1:2;%1:4;
     exp=experiments{ei};
     
-  %  mkdir(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/',expdir,exp,timeUnit,froidir));
+    %  mkdir(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/',expdir,exp,timeUnit,froidir));
     for perm=1:1000;
         f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/perm/speaker_permPhase%04d.mat',expdir,exp,timeUnit,perm);
         load(f,'data','keptvox');
@@ -21,10 +21,13 @@ for ei=3;%1:2;%1:4;
         for ri=1:length(rnames);
             rname=rnames{ri};
             fr = sprintf('%s/roi_mask/%s/mat/%s',expdir,froidir,rname);
-            load(fr,'roimask');
             
-            if sum(roimask(keptvox))>10;
-                data_temp.(rname)(:,:,perm)=data(logical(roimask(keptvox)),:);
+            if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_' rname '.mat'])>0 & exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/permPhase/speaker_' rname '.mat'])==0;
+                load(fr,'roimask');
+                
+                if sum(roimask(keptvox))>10;
+                    data_temp.(rname)(:,:,perm)=data(logical(roimask(keptvox)),:);
+                end
             end
         end
     end
@@ -38,4 +41,5 @@ for ei=3;%1:2;%1:4;
         save(f,'data');
         
     end
+    clear data data_temp
 end

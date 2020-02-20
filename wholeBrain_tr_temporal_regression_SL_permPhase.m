@@ -61,7 +61,7 @@ for ei=1:4;
     end
     
     % couplingz=0.5*log((1+coupling)./(1-coupling));
-    save(sprintf('%s/%s/fmri/temporal_regression/%s/wholeBrain/%s/SLg/perm/regression_SL_lag%d-%d_permPhase%04d',expdir,exp,timeUnit,froidir,min(lags),max(lags),perm),'b','F','r2','p','lags','keptT','r','-v7.3');
+    save(sprintf('%s/%s/fmri/temporal_regression/%s/wholeBrain/SLg/perm/regression_SL_lag%d-%d_permPhase%04d',expdir,exp,timeUnit,min(lags),max(lags),perm),'b','F','r2','p','lags','keptT','r','-v7.3');
     
     clear b F p r2 r Y r2_byTime
 end
