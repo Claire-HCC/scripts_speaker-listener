@@ -10,12 +10,12 @@ rnames=table2array(roi_table(:,3));
 
 tic % 15 min
 
-for ei=[2 4];%1:2;%1:4;
+for ei=[3 4];%1:2;%1:4;
     exp=experiments{ei};
     
     %  mkdir(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/',expdir,exp,timeUnit,froidir));
     for perm=1:1000;
-        f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/perm/speaker_permPhase%04d.mat',expdir,exp,timeUnit,perm);
+        f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/perm/speaker_grayMasked_permPhase%04d.mat',expdir,exp,timeUnit,perm);
         load(f,'data','keptvox');
         
         for ri=1:length(rnames);
@@ -37,7 +37,11 @@ for ei=[2 4];%1:2;%1:4;
         rname=rnames{ri};
         data=data_temp.(rname);
         
-        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/speaker_%s.mat',expdir,exp,timeUnit,froidir,rname);
+        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/speaker_grayMasked_%s.mat',expdir,exp,timeUnit,froidir,rname);
+        save(f,'data');
+        
+        data=zcore(data,0,2)
+        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/zscore_speaker_grayMasked_%s.mat',expdir,exp,timeUnit,froidir,rname);
         save(f,'data');
         
     end

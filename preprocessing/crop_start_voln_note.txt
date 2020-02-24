@@ -1,0 +1,4 @@
+All sessions have 4 dummy scanns in the beginning
+merlin & sherlock listener: 2 For stimulus delay (gap between scan start and stimulus start); 3 For hrf correction); I cropped 20 scans (30s) of the opeining music.
+merlin speaker: 5 tr speaker start delay. 3 Tr hrf correction
+sherlock speaker: 3 tr stimulus start delay and 3 Tr hrf correction

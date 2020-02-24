@@ -1,24 +1,27 @@
-function wholeBrain_phasePerm(perm)
+function wholeBrain_phasePerm
 
 loc='cluster';
 set_parameters;
-rng(perm)
 
-for ei=[1 2 4];%1:2;%1:4;
+
+for ei=[3 4];%1:2;%1:4;
     exp=experiments{ei};
-    clear data
-    f= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/speaker.mat',expdir,exp);
+    
+    % mkdir(sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/',expdir,exp)
+    
+    f= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/speaker_zscore.mat',expdir,exp);
     load(f,'data','keptvox');
     data_real=data;
     
-    data=phase_rand2(data_real',1);
-    data=data';
-    
-    outf= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/speaker_permPhase%04d.mat',expdir,exp,perm);
-    save(outf,'data','keptvox','-v7.3');
-
-    outf= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/zscore_speaker_permPhase%04d.mat',expdir,exp,perm);
-    data=zscore(data,0,2);
-    save(outf,'data','keptvox','-v7.3');
+    for perm=1:1000;
+        
+        rng(perm)
+        data=phase_rand2(data_real',1);
+        data=data';
+        
+        outf= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/speaker_zscore_permPhase%04d.mat',expdir,exp,perm);
+        save(outf,'data','keptvox','-v7.3');
+        clear data
+    end
 end
 

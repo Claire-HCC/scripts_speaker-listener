@@ -18,7 +18,7 @@ perm=$SLURM_ARRAY_TASK_ID
 declare -i perm
 
 
-matlab -nodisplay -r "roi_tr_pattern_lagcorr_SLeach_permPhase($perm)"
+matlab -nodisplay -r "roi_tr_temporal_lagcorr_SLg_permPhase($perm)"
 
 
 

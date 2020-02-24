@@ -40,6 +40,8 @@ for ei=1:4;%[1 2 4];%2:4;
         end
         table(onsets(~isnan(onsets)),rnames(~isnan(onsets)))
         nii=roiTable2wholeBrainNii_mor([roi_ids(~isnan( onsets)),   onsets(~isnan( onsets))]);
+%         rmdir([expdir '/' exp '/fmri/temporal_lagcorr/' timeUnit '/roi/' froidir '/SLg/'],'s');
+%          mkdir([expdir '/' exp '/fmri/temporal_lagcorr/' timeUnit '/roi/' froidir '/SLg/']);
         save_nii(nii,[expdir '/' exp '/fmri/temporal_lagcorr/' timeUnit '/roi/' froidir '/SLg/SL_lag' num2str(min(lags)) '-' num2str(max(lags))  '_betaPeak_neg.nii']);
             
         save([expdir '/' exp '/fmri/temporal_lagcorr/' timeUnit '/roi/' froidir '/SLg/SL_lag' num2str(min(lags)) '-' num2str(max(lags)) '_onsets' ],'rnames','r','lags','keptT','r_perm','p','p_fdr','onsets');

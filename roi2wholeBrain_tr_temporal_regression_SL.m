@@ -4,13 +4,13 @@ loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
-load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
-rnames=table2array(roi_table(:,3));
 speakerSeed='vPCUN';
 crop_start=10;
 lags_tested={-10:10};
 
-for ei=1:4;%2:4;
+load([expdir '/roi_mask/gray_matter_mask.mat'],'roimask');
+mask_gray=find(roimask==1);
+for ei=2:4;%2:4;
     exp=experiments{ei};
     
     for lagi=1%:length(lags_tested);
@@ -18,6 +18,8 @@ for ei=1:4;%2:4;
         
         load(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/speaker_%s.mat',expdir,exp,timeUnit,froidir,speakerSeed),'data');
         load([expdir '/' exp '/fmri/timeseries/' timeUnit '/wholeBrain/listenerAll.mat' ],'gdata','keptvox');
+        gdata=gdata(ismember(keptvox,mask_gray),:,:);
+        keptvox=keptvox(ismember(keptvox,mask_gray));
         [voxn,tn,listenerN]=size(gdata);
         
         b=nan([length(keptvox) length(lags)+1 ]);
@@ -26,6 +28,7 @@ for ei=1:4;%2:4;
         p=nan([length(keptvox) 1]);
         r2_byTime=nan([length(keptvox),tn]);
         r=nan(size(data));
+        
         keptT_s=find(([1:tn]+min(lags))==1)+crop_start;
         keptT_e=min(tn,tn-max(lags));
         keptT=keptT_s:keptT_e;
@@ -52,8 +55,8 @@ for ei=1:4;%2:4;
             clear X
         end
         
-        mkdir([expdir '/' exp '/fmri/temporal_regression/' timeUnit '/roi2wholeBrain/' froidir '/SLg/perm' ]);
-        save([expdir '/' exp '/fmri/temporal_regression/' timeUnit '/roi2wholeBrain/' froidir '/SLg/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','keptT','keptvox','-v7.3');
+        mkdir([expdir '/' exp '/fmri/temporal_regression/' timeUnit '/roi2wholeBrain/SLg/perm/' ]);
+        save([expdir '/' exp '/fmri/temporal_regression/' timeUnit '/roi2wholeBrain/SLg/lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','keptT','r','keptvox','-v7.3');
         clear b F p r2 r2_byTime
     end
 end

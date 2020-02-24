@@ -1,6 +1,5 @@
 function wholeBrain_tr_temporal_regression_SL_permPhase(perm)
 
-rng(perm)
 loc='cluster';
 set_parameters;
 timeUnit='tr' ;

@@ -19,18 +19,18 @@ load([expdir '\roi_mask\mor\' 'roi_id_region.mat'],'roi_table');
 
 
 load([expdir '\roi_mask\mor\roi_ids.mat'],'roi_ids');
-categories=unique(roi_table.category);
-for ci=1:length(unique(roi_table.category));
-    category=categories{ci};
-    rids_selected=cell2mat(roi_table.id(ismember(roi_table.category,category)));
-    
-    roimask=zeros(voxn,1);
-    roimask(ismember(roi_ids,rids_selected))=1;
-    save([expdir '\roi_mask\mor\mat\' category '.mat'],'roimask');
-    
-    nii=mat2nii(roimask);
-    save_nii(nii,[expdir '\roi_mask\mor\nii\' category '.nii']);
-end
+% categories=unique(roi_table.category);
+% for ci=1:length(unique(roi_table.category));
+%     category=categories{ci};
+%     rids_selected=cell2mat(roi_table.id(ismember(roi_table.category,category)));
+%     
+%     roimask=zeros(voxn,1);
+%     roimask(ismember(roi_ids,rids_selected))=1;
+%     save([expdir '\roi_mask\mor\mat\' category '.mat'],'roimask');
+%     
+%     nii=mat2nii(roimask);
+%     save_nii(nii,[expdir '\roi_mask\mor\nii\' category '.nii']);
+% end
 
 for ri=2:length(roi_table.id);
     rname=roi_table.region{ri};

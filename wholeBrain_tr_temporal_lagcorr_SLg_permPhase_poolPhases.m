@@ -7,7 +7,7 @@ crop_start=10;
 lags_tested={-10:10, -30:30};
 permN=1000;
 
-for ei=1:4;
+for ei=3:4;
     exp=experiments{ei};
     
     for lagi=1;%1:length(lags_tested);

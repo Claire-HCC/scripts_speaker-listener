@@ -8,7 +8,7 @@ rnames=table2array(roi_table(:,3));
 lags_tested={-10:10,  -30:30};
 permN=1000;
 
-for ei=1:4;%2:4;
+for ei=1%2:4;
     exp=experiments{ei};
     
     for lagi=1:2%:length(lags_tested);

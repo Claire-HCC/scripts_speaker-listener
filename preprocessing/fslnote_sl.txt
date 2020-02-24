@@ -1,0 +1,40 @@
+dos2unix subjlist.txt
+
+% on rondo
+cd /jukebox/hasson/claire/sl_temp/
+for f in `cat /jukebox/hasson/claire/sl_temp/subjlist.txt | grep -v "#"`; do  
+./scaffold ${f}
+done
+
+% on spock
+for f in `cat subjlist.txt | grep -v "#"`; do
+cp -rf --preserve=links /jukebox/hasson/claire/sl/subjects/${f} /scratch/fmri_preprocessing/
+done
+
+
+module load fsl
+for f in `cat subjlist.txt | grep -v "#"`; do
+ cd ./${f}
+ cd ./data/nifti/
+inputname=`ls *t1.nii.gz`
+outputname=${inputname//_t1.nii/_t1_brain.nii}
+bet ${inputname} ${outputname} -f 0.4
+cd ../../..
+done
+
+
+for f in `cat subjlist.txt | grep -v "#"`; do
+ cd ./${f}
+chmod +x ./*.sh
+chmod +x ./scripts/*.sh
+./prep.sh
+cd ..
+done
+
+for f in `cat subjlist.txt | grep -v "#"`; do
+ cd ./${f}
+./prep.sh
+./analyze.sh
+cd ..
+done
+

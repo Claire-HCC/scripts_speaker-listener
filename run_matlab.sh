@@ -2,11 +2,12 @@
 #SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 3:0:00
-#SBATCH -c 10
-#SBATCH --array=1-1000
-#SBATCH --mem-per-cpu=2G
-
+#SBATCH -t 10:00:00
+#SBATCH -c 5
+#SBATCH --array=1001-2000
+#SBATCH --mem-per-cpu=500M
+#SBATCH --mail-type=END
+#SBATCH --mail-user=hcchang73@gmail.com
 
 module load matlab
 
@@ -23,7 +24,7 @@ declare -i perm
 # matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
 # matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
 
-matlab -nodisplay -r "wholeBrain_tr_temporal_lagcorr_SLg_permPhase($perm)"
+matlab -nodisplay -r "wholeBrain_phasePerm($perm)"
 
 
 # matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"

@@ -1,6 +1,7 @@
 https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2011-March/017668.html
 %% rconstruct mni152. Once is enough.
-% recon-all -all -i MNI152_T1_3x3x4mm_brain.nii -s $SUBJECT
+% SUBJECTS_DIR='/mnt/sink/scratch/claire/speaker-listener/roi_mask'
+% recon-all -all -i MNI152NLin2009cAsym_3x3x4mm_brain.nii -s MNI152NLin2009cAsym_3x3x4mm_brain
 % get the registration file from mni152 volume to mni152 surface
 bbregister --mov /scratch/claire/speaker-listener/roi_mask/MNI152_T1_3x3x4mm_brain_mask.nii --t1 \
     --s $SUBJECT \

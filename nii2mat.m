@@ -1,4 +1,5 @@
-function [data, datasize]=nii2mat(fnii,crop_start,voln)
+function [data, datasize]=nii2mat(fnii,crop_start,voln) 
+
 % set_parameters;
 
 nii=load_nii(fnii);

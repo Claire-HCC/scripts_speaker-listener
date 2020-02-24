@@ -1,6 +1,6 @@
 function roi_tr_temporal_lagcorr_SLg
 
-loc='cluster';
+% loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
@@ -10,7 +10,7 @@ rnames=table2array(roi_table(:,3));
 crop_start=10;
 lags_tested={-10:10, -30:30};
 
-for ei=1:4;
+for ei=1%:4;
     exp=experiments{ei};
     
     for lagi=1;%1:length(lags_tested);
