@@ -9,27 +9,26 @@ rnames=table2array(roi_table(:,3));
 % cropt start because ther eis clearly a spech-start effect in the
 % lsiteners' data
 crop_start=10;
-lags_tested={-10:10,  -30:30};
+lags_tested={-15:15,-10:10,  -40:40, -10:-1 , -40:-1, 1:10,  1:40 };
 % set random seed. Otherwise, phase_rand2 will always get the same result.
 permN=1000;
-
 rname=rnames{ri};
+
 for ei=1:4;
     exp=experiments{ei};
     
-    for lagi=1:length(lags_tested);
+    for lagi=1;%:length(lags_tested);
         lags=lags_tested{lagi};
         b=nan([1 length(lags)+1 permN]);
         r2=nan([1 permN ]);
         
-        if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ]);
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat'],'gdata');
-            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/permPhase/speaker_' rname '.mat'],'data');
-            data_perm=zscore(data,0,2);
+        if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat' ]);
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat'],'gdata');
+            load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rname '.mat'],'data');
             
             [roi_voxn, tn,~]=size(gdata);
             
-            keptT_s=find(([1:tn]+min(lags))==1)+crop_start;
+            keptT_s=min(find(([1:tn]+min(lags))>0))+crop_start;
             keptT_e=min(tn,tn-max(lags));
             keptT=keptT_s:keptT_e;
             
@@ -39,8 +38,11 @@ for ei=1:4;
             y=y(:);
             
             for perm=1:permN;
+                rng(perm);
+                data_perm=(phase_rand2(data',1))';
+                
                 for li=1:length(lags);
-                    X(:,:,li)=data_perm(:,keptT+lags(li),perm);
+                    X(:,:,li)=data_perm(:,keptT+lags(li));
                 end
                 
                 X=reshape(X,roi_voxn*length(keptT),length(lags));
@@ -55,7 +57,7 @@ for ei=1:4;
             end
         end
         
-        save(sprintf('%s/%s/fmri/pattern_regression/%s/roi/%s/SLg/perm/regression_SL_lag%d-%d_permPhase_%s',expdir,exp,timeUnit,froidir,min(lags),max(lags),rname),'b','r2','lags','keptT');
+        save(sprintf('%s/%s/fmri/pattern/regression/%s/roi/%s/SL_g/perm/lag%d-%d_permPhase_%s',expdir,exp,timeUnit,froidir,min(lags),max(lags),rname),'b','r2','lags','keptT','-v7.3');
         clear b r2 keptT rp
     end
 end

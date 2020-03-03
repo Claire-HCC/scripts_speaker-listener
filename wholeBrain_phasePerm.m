@@ -1,19 +1,18 @@
-function wholeBrain_phasePerm
+function wholeBrain_phasePerm(perm_start)
 
 loc='cluster';
 set_parameters;
 
-
-for ei=[3 4];%1:2;%1:4;
+for ei=[2];%1:2;%1:4;
     exp=experiments{ei};
     
-    % mkdir(sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/',expdir,exp)
+    mkdir(sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/perm/',expdir,exp));
     
     f= sprintf('%s/%s/fmri/timeseries/tr/wholeBrain/speaker_zscore.mat',expdir,exp);
     load(f,'data','keptvox');
     data_real=data;
     
-    for perm=1:1000;
+    for perm=(perm_start*1000-1000+1):(perm_start*1000)
         
         rng(perm)
         data=phase_rand2(data_real',1);

@@ -1,4 +1,4 @@
-clear all;
+function wholeBrainPermPahse2roi_batch(ri)
 
 loc='cluster';
 set_parameters;
@@ -7,43 +7,32 @@ timeUnit='tr' ;
 froidir='mor';
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 rnames=table2array(roi_table(:,3));
-
+permN=10000;
 tic % 15 min
+rname=rnames{ri};
 
-for ei=[3 4];%1:2;%1:4;
+lags=-10:10;
+for ei=[4];%[3 4];%1:2;%1:4;
     exp=experiments{ei};
+    % mkdir(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/',expdir,exp,timeUnit,froidir));
     
-    %  mkdir(sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/',expdir,exp,timeUnit,froidir));
-    for perm=1:1000;
-        f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/perm/speaker_grayMasked_permPhase%04d.mat',expdir,exp,timeUnit,perm);
-        load(f,'data','keptvox');
+    if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rname '.mat'])>0 & exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/permPhase/speaker_zscore_' rname '.mat'])==0;
         
-        for ri=1:length(rnames);
-            rname=rnames{ri};
-            fr = sprintf('%s/roi_mask/%s/mat/%s',expdir,froidir,rname);
+        fr = sprintf('%s/roi_mask/%s/mat/%s',expdir,froidir,rname);
+        load(fr,'roimask');
+        
+        for perm=1:permN;
+            f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/perm/speaker_zscore_permPhase%04d.mat',expdir,exp,timeUnit,perm);
+            load(f,'data','keptvox');
             
-            if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_' rname '.mat'])>0 & exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/permPhase/speaker_' rname '.mat'])==0;
-                load(fr,'roimask');
-                
-                if sum(roimask(keptvox))>10;
-                    data_temp.(rname)(:,:,perm)=data(logical(roimask(keptvox)),:);
-                end
+            if sum(roimask(keptvox))>10;
+                data_temp(:,:,perm)=data(logical(roimask(keptvox)),:);
             end
         end
-    end
-    
-    rnames=fieldnames(data_temp)
-    for ri=1:length(rnames);
-        rname=rnames{ri};
-        data=data_temp.(rname);
-        
-        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/speaker_grayMasked_%s.mat',expdir,exp,timeUnit,froidir,rname);
-        save(f,'data');
-        
-        data=zcore(data,0,2)
-        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/zscore_speaker_grayMasked_%s.mat',expdir,exp,timeUnit,froidir,rname);
-        save(f,'data');
+        data=data_temp;
+        f= sprintf('%s/%s/fmri/timeseries/%s/roi/%s/permPhase/speaker_zscore_%s.mat',expdir,exp,timeUnit,froidir,rname);
+        save(f,'data','-v7.3');
+        clear data_temp
         
     end
-    clear data data_temp
 end

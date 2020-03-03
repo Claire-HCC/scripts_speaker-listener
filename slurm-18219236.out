@@ -1,0 +1,20 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2018 The MathWorks, Inc.
+                   R2018a (9.4.0.813654) 64-bit (glnxa64)
+                             February 23, 2018
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+{Error using save
+Cannot create 'lag-15-15.mat' because
+'/scratch/claire/speaker-listener/pieman/fmri/pattern/lagcorr/tr/roi/mor/LL_leave1out'
+does not exist.
+
+Error in roi_pattern_lagcorr_LL_leave1out (line 52)
+    save([expdir '/' exp '/fmri/pattern/lagcorr/' timeUnit '/roi/' froidir
+    '/LL_leave1out/lag' num2str(min(lags)) '-' num2str(max(lags))
+    ],'r','lags','rnames','keptT');
+} 

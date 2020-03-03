@@ -49,7 +49,7 @@ x_phase = atan2(imag(Fx), real(Fx)); %get the phases of the Fourier components [
 J = sqrt(-1);  %define the vertical vector in the complex plane
 
 % will contain symmetrized randomized phases for each bootstrap
-sym_phase = x_phase;%zeros(Nsamp,K);
+sym_phase = x_phase;%zeros(Nsamp,K); 
 
 
 

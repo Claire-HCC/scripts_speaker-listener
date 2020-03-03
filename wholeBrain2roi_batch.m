@@ -10,7 +10,7 @@ rnames=strrep({rnames.name},'.mat','');
 
 tic % 15 min
 
-for ei=3:4;%1:4;
+for ei=1:2;%1:4;
     exp=experiments{ei};
     
     mkdir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir ]);

@@ -1,6 +1,6 @@
 function roi_tr_pattern_regression_SL
 
-loc='cluster';
+% loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
@@ -8,15 +8,15 @@ load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
 rnames=table2array(roi_table(:,3));
 
 crop_start=10;
-lags_tested={-10:10, -20:20, -30:30, -10:-4, -20:-4, -30:-4, -10:-1};
+lags_tested={-15:15, -10:10,  -40:40, -10:-1 , -40:-1, 1:10,  1:40 , -4:4};
 
 for ei=1:4;
     exp=experiments{ei};
     
-    for lagi=1:length(lags_tested);
+    for lagi=1;%:length(lags_tested);
         lags=lags_tested{lagi};
         
-        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rnames{1} '.mat' ],'data')
+        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rnames{1} '.mat' ],'data')
         tn=size(data,2);
         
         b=nan([length(rnames) length(lags)+1 ]);
@@ -28,13 +28,13 @@ for ei=1:4;
         for ri=1:size(rnames);
             rname=rnames{ri};
             
-            if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ]);
-                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
-                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rname '.mat'],'data');
+            if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat' ]);
+                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat' ],'gdata');
+                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rname '.mat'],'data');
                 
                 roi_voxn=size(gdata,1);
                 
-                keptT_s=find(([1:tn]+min(lags))==1)+crop_start;
+                keptT_s=min(find(([1:tn]+min(lags))>0))+crop_start;
                 keptT_e=min(tn,tn-max(lags));
                 keptT=keptT_s:keptT_e;
                 
@@ -65,11 +65,10 @@ for ei=1:4;
                 r2_byTime(ri,keptT)=1-ssr./sst;
                 
                 clear X
-
             end
         end
         
-        save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/SLg/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
+        save([expdir '/' exp '/fmri/pattern/regression/' timeUnit '/roi/' froidir '/SL_g/lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
         clear b F p r2 r2_byTime
     end
 end

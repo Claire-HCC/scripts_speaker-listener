@@ -2,10 +2,10 @@
 #SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 10:00:00
-#SBATCH -c 5
-#SBATCH --array=1001-2000
-#SBATCH --mem-per-cpu=500M
+#SBATCH -t 15:00:00
+#SBATCH -c 10
+#SBATCH --array=1-10
+#SBATCH --mem-per-cpu=1G
 #SBATCH --mail-type=END
 #SBATCH --mail-user=hcchang73@gmail.com
 
@@ -19,16 +19,10 @@ perm=$SLURM_ARRAY_TASK_ID
 declare -i perm
 
 
-# matlab -nodisplay -r "roi_tr_pattern_regression_SL_lagSelection($perm)"
-# matlab -nodisplay -r "roi_tr_pattern_regression_LL_lagSelection($perm)"
-# matlab -nodisplay -r "roi_tr_pattern_regression_SL_permSubj($perm)"
-# matlab -nodisplay -r "roi_tr_pattern_regression_LL_permSubj($perm)"
-
-matlab -nodisplay -r "wholeBrain_phasePerm($perm)"
+matlab -nodisplay -r "wholeBrain_phasePerm_L($perm)"
 
 
-# matlab -nodisplay -r "roi_tr_bined_pattern_granger_SL_permSubj($s)"
-# matlab -nodisplay -r "roi_tr_bined_pattern_regression_LL_permSubj($s)"
+
 
 
 

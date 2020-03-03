@@ -1,26 +1,20 @@
 % copy data from Sam
-for s in {01..48}; do cp /scratch/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-bronx.MNI152NLin2009cAsym.3x3x4mm.tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/listener/; done 
-cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-bronx.MNI152NLin2009cAsym.tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/speaker/
+for s in {01..48}; do cp  /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-bronx_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/listener/; done 
+cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-bronx_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/speaker/
 
-for s in {01..48}; do cp /scratch/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-pieman.MNI152NLin2009cAsym.3x3x4mm.tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/listener/; done 
-cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-pieman_acq-277vol.MNI152NLin2009cAsym.tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/speaker/
+for s in {01..48}; do cp  /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-pieman_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/listener/; done 
+cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-pieman_acq-277vol_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/speaker/
+
 
 % change file type. NIFTI_GZ > NIFTI
-role=speaker
-for exp in bronx pieman; do
-for s in {01..01}; do 
-f=`ls /jukebox/hasson/claire/speaker-listener/FromOthers/fromSam/${exp}/${role}/*`
-# flirt -in $f -ref "/scratch/claire/speaker-listener/roi_mask/MNI152_T1_3mm_brain" -applyxfm -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}"
-fslchfiletype NIFTI $f "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}"; 
-done ;
-done
-
-role=listener
+role=listener;
 for exp in bronx pieman; do
 for s in {01..48}; do 
-fslchfiletype NIFTI "/jukebox/hasson/claire/speaker-listener/FromOthers/fromSam/${exp}/${role}/sub-${s}_task-${exp}.MNI152NLin2009cAsym.3x3x4mm.tproject.nii.gz" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}"; 
+f=`ls /scratch/claire/speaker-listener/FromOthers/fromSam/${exp}/${role}/*`
+fslchfiletype NIFTI $f "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}"; 
 done ;
-done
+done 
+
 
 % crop file
 There are 8 TRs of silence in the beginning and end of listener EPI respectively.
