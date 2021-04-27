@@ -1,0 +1,79 @@
+LHD: Partitur 1.2.6
+REP: Muenchen
+SNB: 2
+SAM: 16000
+SBF: 01
+SSB: 16
+NCH: 1
+SPN: AAK
+LBD:
+TR2:	0	#vierundzwanzigste<Z>r
+TR2:	1	auf
+TR2:	2	#f"unfundzwanzigsten
+TR2:	3	Juni , <A>
+TR2:	4	Dienstag
+TR2:	5	auf
+TR2:	6	<:<#> Mittwoch:> ? 
+ORT:	0	vierundzwanzigster
+ORT:	1	auf
+ORT:	2	f"unfundzwanzigsten
+ORT:	3	Juni
+ORT:	4	Dienstag
+ORT:	5	auf
+ORT:	6	Mittwoch
+NOI:	3;4	<A>
+NOI:	6	<#>
+DAS: 0,1,2,3,4,5,6	@(REQUEST_CLARIFY BA)
+SYN:	0	1	ADJX
+SYN:	0,1,2	0	ADJX
+SYN:	0,1,2,3	0	NX
+SYN:	0,1,2,3,4,5,6	0	NX
+SYN:	2	1	ADJX
+SYN:	4	1	NX
+SYN:	4,5,6	0	NX
+SYN:	6	1	NX
+FUN:	0	0	HD
+FUN:	0	1	-
+FUN:	0,1,2	0	-
+FUN:	0,1,2,3	0	HD
+FUN:	0,1,2,3,4,5,6	0	--
+FUN:	1	0	-
+FUN:	2	0	HD
+FUN:	2	1	-
+FUN:	3	0	HD
+FUN:	4	0	HD
+FUN:	4	1	-
+FUN:	4,5,6	0	-
+FUN:	5	0	-
+FUN:	6	0	HD
+FUN:	6	1	-
+LEX:	0	0	ADJA
+LEX:	1	0	APPR
+LEX:	2	0	ADJA
+LEX:	3	0	NN
+LEX:	4	0	NN
+LEX:	5	0	APPR
+LEX:	6	0	NN
+POS:	0	ORD
+POS:	1	APPR
+POS:	2	ORD
+POS:	3	NN
+POS:	4	NN
+POS:	5	APPR
+POS:	6	NN
+LMA:	0	vierundzwanzigst
+LMA:	1	auf
+LMA:	2	f"unfundzwanzigst
+LMA:	3	Juni
+LMA:	4	Dienstag
+LMA:	5	auf
+LMA:	6	Mittwoch
+PRO: 3;4	PC2
+PRO: 6	PM3
+KAN:	0	f'i:6#Unt#tsv"antsICst6
+KAN:	1	QaUf+
+KAN:	2	f'Ynf#Unt#tsv"antsICst@n
+KAN:	3	j'u:ni
+KAN:	4	d'i:nsta:k
+KAN:	5	QaUf+
+KAN:	6	m'ItvOx

@@ -1,0 +1,51 @@
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask/'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+
+f='restFc_isc30PercMasked_75Overlap_cluster6'
+dir_current='.'
+expdir='/scratch/claire/speaker-listener/'
+
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi rh --o $dir_current/$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi lh --o $dir_current/$f'_lh.mgh' --out_type mgh 
+
+mris_seg2annot --s $SUBJECT --h lh --seg $dir_current/$f'_lh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_6network_jet.txt' --o $dir_current/$f'_lh.annot' 
+mris_seg2annot --s $SUBJECT --h rh --seg $dir_current/$f'_rh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_6network_jet.txt' --o $dir_current/$f'_rh.annot' 
+
+
+
+tksurfer  $SUBJECT lh inflated -curv -gray 
+
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+set f "restFc_isc30PercMasked_75Overlap_cluster6"
+set dir_current "."
+
+labl_import_annotation "${dir_current}/${f}_lh.annot"
+redraw 
+save_tiff "${dir_current}/${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_lh_m.tif"
+rotate_brain_y 180
+labl_remove_all
+
+
+
+tksurfer  $SUBJECT rh inflated -curv -gray 
+
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+set f "restFc_isc30PercMasked_75Overlap_cluster6"
+set dir_current "."
+
+labl_import_annotation "${dir_current}/${f}_rh.annot"
+redraw 
+save_tiff "${dir_current}/${f}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_rh_m.tif"
+rotate_brain_y 180
+labl_remove_all
+

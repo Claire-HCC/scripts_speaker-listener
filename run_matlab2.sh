@@ -19,7 +19,7 @@ perm=$SLURM_ARRAY_TASK_ID
 declare -i perm
 
 
-matlab -nodisplay -r "roi_tr_pattern_circularlagcorr_SL_g_permPhase($perm)"
+matlab -nodisplay -r "roi_pattern_regression_SL_each($perm)"
 
 
 

@@ -43,5 +43,5 @@ upper=upper'; end
 h=fill([x fliplr(x)],[upper fliplr(lower)],colour)
 set(h,'facealpha',transparency,'LineStyle','none');
 hold on
-plot(x,m,colour,'linewidth',2);
+plot(x,m,'color',colour,'linewidth',2);
 hold off

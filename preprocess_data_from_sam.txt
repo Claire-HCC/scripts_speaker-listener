@@ -1,0 +1,136 @@
+
+I decide to skip slice timing for pieman/bronx/black/forgot, since multiband acquisition was used and the temporal gap is small. 
+Fieldmap correction
+Either magnitude file works: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide
+
+# dos2unix subjlist.txt
+
+## create preprocessing folder
+for s in {02..02}; do
+./scaffold "sub-${s}"
+done
+
+## copy file from sam
+for s in {02..48}; do 
+# dir_current="/scratch/claire/speaker-listener/FromOthers/fromSam/${exp}_raw/listener/" 
+cp "/jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/sub-${s}/fmap/sub-${s}_magnitude1.nii.gz" /scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/
+cp "/jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/sub-${s}/fmap/sub-${s}_phasediff.nii.gz" /scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/
+# find /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/ -name 'sub-*task-'${exp}'_bold.nii.gz' -exec cp "{}" ${dir_current}  \;
+# find /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/ -name 'sub-*_T1w.nii.gz' -exec cp "{}" ${dir_current}  \;
+done
+
+# bet magnitude fieldmap
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/"
+cd ${dir_current}/data/nifti/
+inputname=`ls *magnitude1.nii.gz`
+outputname=${inputname//_magnitude1.nii/_magnitude1_brain.nii}
+bet ${inputname} ${outputname}
+# https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT/StepByStep
+fslmaths ${outputname} -ero ${outputname}
+cd ../../..
+done
+
+## prepare rad fieldmap
+# parameter from dcm2niix json
+# Difference of Echo Times 2.46 ms is obatined from sub-*_phasediff.json (EchoTime2 - EchoTime1)
+# https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide
+# EffectiveEchoSpacing: 0.509996 (ms)
+# https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/glossary.html
+# slice timeing from json divied by TR was save in sliceTiming.txt
+# the first row shows the acquisition time of the first slice saved to disc.
+# our sequence save the slices from Foot>Head (check with mricron: https://www.nitrc.org/forum/forum.php?thread_id=8622&forum_id=4703), which is the standard way.
+# therefore, the txt file conforms to fsl format (unit in TR, f>h) and can be input to feat for slice timing
+# TE: 31 ms
+# PhaseEncodingDirection": "j-",
+# prepare fieldmap
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/"
+fsl_prepare_fieldmap SIEMENS "${dir_current}/sub-${s}_phasediff.nii.gz" "${dir_current}/sub-${s}_magnitude1_brain.nii.gz" "${dir_current}/sub-${s}_fmap_rads" 2.46
+done
+
+## motion outlier can be used as regressor in L1 model. 
+## I decided not to use L1 model becasue the participants' did not move too much and 
+## the results before and after regresing out movement parameters using fmriprep are very similar
+# for exp in black forgot pieman bronx; do
+# for s in {01..01}; do 
+# dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/"
+#　fsl_motion_outliers -i "${dir_current}/sub-${s}_task-${exp}_bold" -o "${dir_current}/sub-${s}_task-${exp}_bold_motionOutlier"
+# done
+# done
+
+## copy shared file after scaffold
+## $FSLDIR/data/standard/d/MNI152_T1_2mm_brain.nii.gz
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/scripts/"
+# cp /scratch/claire/speaker-listener/fmri_preprocesing/prototype/copy/fsf/preproc.fsf.template "${dir_current}"
+cp /scratch/claire/speaker-listener/fmri_preprocesing/prototype/copy/scripts/apply-transform.sh "${dir_current}"
+done
+
+
+
+for exp in black ; do
+dir_current='/scratch/claire/speaker-listener/FromOthers/fromSam/'${exp}'_raw/listener/'
+for s in {01..48}; do 
+fslchfiletype NIFTI "${dir_current}/sub-${s}_task-${exp}_bold.nii.gz" "/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/sub-${s}_task-${exp}_bold"
+# fslchfiletype NIFTI "${dir_current}/sub-${s}_T1w.nii.gz" "/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/data/nifti/sub-${s}_T1w"
+done
+done
+
+## bet T1
+module load fsl
+for s in {02..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/"
+cd ${dir_current}/data/nifti/
+inputname=`ls *T1w.nii`
+outputname=${inputname//_T1w.nii/_T1w_brain.nii}
+bet ${inputname} ${outputname} -f 0.4
+cd ../../..
+done
+
+
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/"
+cd ${dir_current}
+chmod +x ./*.sh
+chmod +x ./scripts/*.sh
+./prep.sh
+cd ..
+done
+
+
+# use sbatch ./run_fsl.sh for analyze.sh and ./scripts/apply-transform.sh
+
+for exp in black; do
+for s in {31..31}; do 
+# https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT/FAQ#Can_I_register_to_an_image_but_use_higher.2Flower_resolution_.28voxel_size.29.3F
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/analysis/preproc/preproc_${exp}.feat/"
+dir_out="/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/"
+fslchfiletype NIFTI "${dir_current}/trans_filtered_func_data_3x3x4mm.nii.gz" "${dir_out}/sub-${s}"
+done
+done
+
+
+# use sbatch to run below-----------------------------------------------------
+# standard152 from $FSLDIR/data/standard/
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/"
+${dir_current}/analyze.sh
+done
+
+for s in {01..48}; do 
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/"
+${dir_current}/scripts/apply-transform.sh
+done
+
+#######
+% nii.gz to nii
+for s in {31..31}; do 
+# https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT/FAQ#Can_I_register_to_an_image_but_use_higher.2Flower_resolution_.28voxel_size.29.3F
+dir_current="/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-${s}/analysis/preproc/preproc_black.feat/"
+dir_out="/scratch/claire/speaker-listener/black/fmri/timeseries/tr_uncropped/wholeBrain/"
+dir_roi="/scratch/claire/speaker-listener/roi_mask/"
+flirt -in "${dir_current}/filtered_func_data.nii.gz" -ref "${dir_roi}/MNI152_T1_1mm_brain.nii.gz" -out "${dir_current}/trans_filtered_func_data.nii.gz" -applyxfm -init ${dir_current}/reg/example_func2standard.mat
+flirt -in "${dir_current}/trans_filtered_func_data.nii.gz" -ref "${dir_roi}/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "${dir_current}/trans_filtered_func_data_3x3x4mm.nii.gz" -applyxfm -usesqform 
+fslchfiletype NIFTI "${dir_current}/trans_filtered_func_data_3x3x4mm.nii.gz" "${dir_out}/sub-${s}"
+done

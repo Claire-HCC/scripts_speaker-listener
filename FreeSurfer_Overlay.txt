@@ -3,42 +3,129 @@ https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2011-March/017668.html
 % SUBJECTS_DIR='/mnt/sink/scratch/claire/speaker-listener/roi_mask'
 % recon-all -all -i MNI152NLin2009cAsym_3x3x4mm_brain.nii -s MNI152NLin2009cAsym_3x3x4mm_brain
 % get the registration file from mni152 volume to mni152 surface
-bbregister --mov /scratch/claire/speaker-listener/roi_mask/MNI152_T1_3x3x4mm_brain_mask.nii --t1 \
-    --s $SUBJECT \
-    --reg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat
-
-% for one overlay
-% reconstruct the MNI 3mm brain
-SUBJECTS_DIR='/scratch/claire/ABC/fMRI/roi_mask'
-SUBJECT='FreeSurfer_MNI152_T1_3mm'
-
-% don not forget to use 3x3x4mm surface when freesufer is done with recon-all
-f='herdt_regression_binSize10_lag-10--4_fdr'
-
+bbregister --mov /scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii --t1 /
+    --s $SUBJECT /
+    --reg /scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain/register2surface.dat
 % cd to the folder with the functional image
 % trsform the volumetric functional image into suface image
-mri_vol2surf --src $f'.nii' --srcreg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
-mri_vol2surf --src $f'.nii' --srcreg /scratch/claire/speaker-listener/roi_mask/register2mni3mm.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+expdir='/scratch/claire/speaker-listener/'
+f='vPCUN_lag-10-10_groupT_posPeakLagOrders_pfdr'
 
-% show it with tksurfer and save it
-% I don't know why, but I have to run tksurfer first and wait the gui to come out before running the rest of the scripts.
-tksurfer -overlay $f"_lh.mgh" $SUBJECT lh inflated -fminmax 2 15 -fthresh 2
-set f "herdt_regression_binSize10_lag-10--4_fdr"
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi rh --o $f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi lh --o $f'_lh.mgh' --out_type mgh 
+
+tksurfer $SUBJECT lh inflated -overlay "$f"_lh.mgh -fminmax 0 21 -fthresh 0.1 -curv 1 -colscalebarflag 0
+set f vPCUN_lag-10-10_groupT_posPeakLagOrders_pfdr
 save_tiff "${f}_lh_l.tif"
 rotate_brain_y 180
 redraw 
 save_tiff "${f}_lh_m.tif"
 exit
 
-
-tksurfer -overlay $f"_rh.mgh" $SUBJECT rh inflated -fminmax 2 15 -fthresh 2
-set f "herdt_regression_binSize10_lag-10--4_fdr"
+tksurfer $SUBJECT rh inflated -overlay "$f"_rh.mgh -fminmax 0 21 -fthresh 0.1 -curv 1 -colscalebarflag 0
+set f vPCUN_lag-10-10_groupT_posPeakLagOrders_pfdr
 save_tiff "${f}_rh_l.tif"
 rotate_brain_y 180
-set colscalebarflag 1
 redraw 
 save_tiff "${f}_rh_m.tif"
 exit
-  
 
 
+
+
+
+----------------------------------------------------------------------------
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+expdir='/scratch/claire/speaker-listener/'
+for exp in merlin sherlock
+do
+
+for interROItype in roi2rois
+do 
+
+for interSubjType in LL_leave1out
+do
+
+dir_current="${expdir}${exp}/fmri/temporal/lagcorr/tr/${interROItype}/mor/${interSubjType}/"
+
+for f in "$dir_current"/*peakLag_pfdr_lag*.nii;
+do
+f=$(basename $f)
+f=$(echo "$f" | cut -f 1 -d '.')
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi rh --o $dir_current/$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi lh --o $dir_current/$f'_lh.mgh' --out_type mgh 
+
+mri_cor2label --i $dir_current/$f'_rh.mgh' --surf $SUBJECT rh --id 1 --l $dir_current/$f'_rh.label'                                                                                         
+mri_cor2label --i $dir_current/$f'_lh.mgh' --surf $SUBJECT lh --id 1 --l $dir_current/$f'_lh.label'    
+
+% mris_label2annot --s $SUBJECT --h rh --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_jet.txt' --a $dir_current/$f --l $dir_current/$f'_rh.label' 
+% mris_label2annot --s $SUBJECT --h rh --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_jet.txt' --a $dir_current/$f --l $dir_current/$f'_lh.label' 
+
+done
+done
+done
+done
+done
+
+
+% show it with tksurfer and save it
+% I don't know why, but I have to run tksurfer first and wait the gui to come out before running the rest of the scripts.
+% lh, to show only positive value: -truncphaseflag 1
+tksurfer  $SUBJECT lh inflated -curv -gray -fminmax 1 21 -fthresh 0.0000001
+
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask/"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir /scratch/claire/speaker-listener/
+
+foreach exp [list merlin sherlock] {
+foreach interROItype [list roi2rois] {
+foreach interSubjType [list SL_each LL_leave1out] {
+
+set dir_current "${expdir}${exp}/fmri/temporal/lagcorr/tr/${interROItype}/mor/${interSubjType}/"
+set fs [glob -directory "${dir_current}" -- "*PeakLagOrders*.nii"]
+
+foreach f $fs {
+set f [file rootname [file tail $f]]
+set ff "${dir_current}/${f}"
+sclv_read_from_volume 1 "${ff}_lh.mgh" 0 "${SUBJECTS_DIR}${SUBJECT}/register2surface.dat"
+redraw 
+save_tiff "${ff}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${ff}_lh_m.tif"
+rotate_brain_y 180
+redraw 
+}}}}
+exit
+
+
+% rh. to show only positive value: -truncphaseflag 1
+tksurfer  $SUBJECT rh inflated -curv -gray -fminmax 1 21 -fthresh 0.0000001
+
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask/"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir /scratch/claire/speaker-listener/
+
+foreach exp [list merlin sherlock] {
+foreach interROItype [list roi2rois] {
+foreach interSubjType [list SL_each LL_leave1out] {
+
+set dir_current "${expdir}${exp}/fmri/temporal/lagcorr/tr/${interROItype}/mor/${interSubjType}/"
+set fs [glob -directory "${dir_current}" -- "*PeakLagOrders*.nii"]
+
+foreach f $fs {
+set f [file rootname [file tail $f]]
+set ff "${dir_current}/${f}"
+sclv_read_from_volume 1 "${ff}_rh.mgh" 0 "${SUBJECTS_DIR}${SUBJECT}/register2surface.dat"
+redraw 
+save_tiff "${ff}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${ff}_rh_m.tif"
+rotate_brain_y 180
+redraw 
+}}}}
+exit

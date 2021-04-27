@@ -1,0 +1,60 @@
+# this script save the trasformed and shared feature timeseries based on SRM trained by the whole story
+# spock doesn't have the version of sklearn srm requires.
+# create an custom enviromen and activate it before using srm 
+# conda create -n srmEnv 
+# source activate srmEnv
+# conda install -n srmEnv pip
+module load anacondapy/3.4
+module load pyger
+source activate srmEnv
+python
+
+# in python
+# train with the AB part and apply to the C part
+import scipy.io
+from scipy.stats import stats
+from sklearn.metrics import confusion_matrix
+from sklearn.svm import NuSVC
+from sklearn.svm import LinearSVC
+import numpy as np
+import brainiak.funcalign.srm
+import os
+import glob
+import ntpath
+
+# experiment specific parameters
+expdir='/scratch/claire/speaker-listener/'
+exp='merlin'
+timeUnit='tr'
+froidir='mor'
+
+# load mat file
+for roiname in  glob.glob(os.path.join(expdir + '/' + exp + '/fmri/timeseries/' + timeUnit + '/roi/' + froidir , 'zscore_listenerAll_dPCC*.mat')):
+    data_mat=scipy.io.loadmat(roiname)
+    gdata=data_mat['gdata']
+    
+    if gdata.shape[0]>50:
+        # Convert data to a list of arrays matching SRM input.
+        # Each element is a matrix of voxels by TRs.
+        listenerN = gdata.shape[2]
+        
+        data = []
+        for s in range(listenerN):
+              data.append(np.concatenate([gdata[:, :, s]], axis=0))
+        
+    
+        # help(brainiak.funcalign.srm.SRM)
+        srm = brainiak.funcalign.srm.SRM(n_iter=10, features=50)
+        srm.fit(data)
+        
+        srm_ws=[]
+        for s in range(len(data)):
+            srm_ws.append(np.dot(srm.w_[s],srm.s_))
+            
+        temp=np.stack(srm_ws,axis=2)
+        roiname=os.path.splitext(os.path.basename(roiname))[0]
+        scipy.io.savemat(expdir + '/' + exp + '/fmri/timeseries/' + timeUnit + '/roi/' + froidir + roiname + '_listenersSRMws.mat', dict(gdata=temp))
+       
+
+
+

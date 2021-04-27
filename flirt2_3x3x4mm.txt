@@ -1,0 +1,64 @@
+﻿% MNI152NLin2009cAsym_3x3x4mm_brain is from Sam
+% https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT/FAQ
+% Example 3: transforming a mask between different resolution versions of standard space (e.g. 3mm to 2mm) 
+
+
+% listener
+for exp in merlin sherlock; do
+for s in {02..18}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/3x3x3mm/listener${s}.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/listener${s}.nii" ;
+done ;
+done 
+
+for exp in pieman0; do
+for s in {2..36}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/3x3x3mm/sub-${s}-task-intact1.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/3x3x3mm/sub-${s}-task-intact2.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii" ;
+done ;
+done 
+
+for exp in pieman_oldWord; do
+for s in {2..51}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/3x3x3mm/sub-${s}-task-word.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii" ;
+done ;
+done 
+
+for exp in pieman_rest; do
+dir_current="/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/old/"
+for f in $dir_current/*.nii; do
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/old/${f}" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/${f}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/${f}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/${f}.nii" ;
+done ;
+done 
+
+for exp in pieman_rest; do
+for s in {70..70}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/old/sub-${s}-task-rest1.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii" ;
+done ;
+done 
+
+for exp in ABC; do
+for s in {01..01}; do 
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/old/listener${s}.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii.gz"  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/wholeBrain/listener${s}.nii" ;
+done ;
+done 
+
+% speaker
+exp=sherlock
+flirt -in "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/3x3x3mm/speaker01.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/speaker01.nii"  -applyxfm -usesqform
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/speaker01.nii" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/speaker01"
+
+
+% roi
+flirt -in "/scratch/claire/speaker-listener/roi_mask/mor/roi_ids_3x3x3mm.nii" -ref "/scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii" -out "/scratch/claire/speaker-listener/roi_mask/mor/roi_ids.nii"  -applyxfm -usesqform -interp nearestneighbour
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/roi_mask/mor/roi_ids.nii" "/scratch/claire/speaker-listener/roi_mask/mor/roi_ids"
+
+fast -t 1  MNI152NLin2009cAsym_3x3x4mm_brain.nii 
+nii=load_nii('MNI152NLin2009cAsym_3x3x4mm_brain_seg.nii');
+nii.img=(nii.img==2);
+save_nii(nii,'MNI152NLin2009cAsym_3x3x4mm_brain_gm.nii');

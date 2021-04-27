@@ -1,0 +1,29 @@
+Example Files for Single WebMAUS services 
+=========================================
+
+These files are designed to be used with the BAS Web Services found at
+
+http://clarin.phonetik.uni-muenchen.de/BASWebServices
+
+WebMAUS Basic
+-------------
+
+  example1.wav and example1.txt : spontaneous German, simple transcript
+  example2.txt and example2.txt : read German, number in transcript
+
+Those files are designated to be used with the WebMAUS Basic services, which does a automatic graphem-to-phoneme conversion.
+
+
+WebMAUS General
+---------------
+
+  example-3-general.nis and example-3-general.par
+  example-4-general-en.wav and example-4-general-en.par
+  example-5-general-hu.wav and example-5-general-hu.par
+
+The files are pairs to be used with the WebMAUS General services, that allows for more options to be set and the user to specify her own KAN tier. The extension '.par' indicates the BAS Partitur Format (BPF). More information on the BPF can be found here http://www.bas.uni-muenchen.de/forschung/Bas/BasFormatseng.html#Partitur
+The extension '.nis' is used for a different signal file format 
+NIST SPHERE (mostly used by American databases) understood by MAUS.
+
+They are ready to use, but you have to select the appropriate language (German for example-3[...], English for example-4[...] and Hungarian for example-5[...]). For more information please read the specific help page to the service or open http://clarin.phonetik.uni-muenchen.de/BASWebServicesTest/services/help in your browser
+

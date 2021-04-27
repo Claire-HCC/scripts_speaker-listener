@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -J 'Exp'
+#SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 2:00:00
+#SBATCH -t 10:00:00
 #SBATCH -c 10
-#SBATCH --array=1-4
-#SBATCH --mem-per-cpu=1G
+#SBATCH --array=4-8
+#SBATCH --mem-per-cpu=2G
 #SBATCH --mail-type=END
 #SBATCH --mail-user=hcchang73@gmail.com
 
@@ -13,17 +13,14 @@ module load matlab
 
 expdir="/mnt/sink/scratch/claire/speaker-listener/"
 
-# fs=`ls $expdir/$exp/fmri/timeseries/tr/roi/mor/zscore_listenerAll_*.mat`
-
-ei=$SLURM_ARRAY_TASK_ID
-declare -i ei
+perm=$SLURM_ARRAY_TASK_ID
+declare -i perm
 
 
-matlab -nodisplay -r "roi_pattern_lagcorr_LL_leave1out($ei)"
+matlab -nodisplay -r "vox2vox_temporal_circularlagcorr_LL_leave1out($perm)"
 
 
-# sqeueu -u huichuan
-# scancel <jobid>
+
 
 
 

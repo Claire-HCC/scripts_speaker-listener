@@ -1,100 +1,140 @@
 https://mail.nmr.mgh.harvard.edu/pipermail//freesurfer/2011-March/017668.html
 %% rconstruct mni152. Once is enough.
-% recon-all -all -i MNI152_T1_3mm_brain.nii -s $SUBJECT
+% recon-all -all -i MNI152NLin2009cAsym_3x3x4mm_brain.nii -s $SUBJECT
 % get the registration file from mni152 volume to mni152 surface
-% bbregister --mov $SUBJECTS_DIR/MNI152_T1_3mm_brain.nii --t1 \
+% bbregister --mov $SUBJECTS_DIR/MNI152NLin2009cAsym_3x3x4mm_brain.nii --t1 \
 %    --s $SUBJECT \
 %    --reg $SUBJECTS_DIR/$SUBJECT/register.dat
 
 % for one overlay
 % reconstruct the MNI 3mm brain
-SUBJECTS_DIR='/scratch/claire/ABC/fMRI/roi_mask'
-SUBJECT='FreeSurfer_MNI152_T1_3mm'
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask/'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
 f='mp_simz_qmax05_pos_mask'
 
-% cd to the folder with the functional image
-% trsform the volumetric functional image into suface image
-mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
-mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
-
-mri_cor2label --i $f'_rh'.mgh --surf $SUBJECT rh --id 1 --l ./$f'_rh.label'                                                                                                                              
-mri_cor2label --i $f'_lh.mgh' --surf $SUBJECT lh --id 1 --l ./$f'_lh.label'         
-
-mris_label2annot --s $SUBJECT --h lh --ctab ctab.txt --a visualwang2014 --l mp_simz_qmax05_pos_mask_lh.label --l V1V2V3V4_lh.label --l V3ab_lh.label --l LO_lh.label --l VO_PHC_lh.label --l IPS_lh.label --nhits nhits.mgh 
-mris_label2annot --s $SUBJECT --h rh --ctab ctab.txt --a visualwang2014 --l mp_simz_qmax05_pos_mask_rh.label --l V1V2V3V4_rh.label --l V3ab_rh.label --l LO_rh.label --l VO_PHC_rh.label --l IPS_rh.label --nhits nhits.mgh 
 
 
-% show it with tksurfer and save it
-% I don't know why, but I have to run tksurfer first and wait the gui to come out before running the rest of the scripts.
-tksurfer $SUBJECT lh inflated 
-save_tiff lh_l.tif
-rotate_brain_y 90
-redraw 
-save_tiff lh_p.tif
-rotate_brain_y 90
-redraw 
-save_tiff lh_m.tif
-rotate_brain_x 90
-redraw 
-save_tiff lh_bottum.tif
-exit
-
-tksurfer $SUBJECT rh inflated 
-save_tiff rh_l.tif
-rotate_brain_y 90
-redraw 
-save_tiff rh_p.tif
-rotate_brain_y 90
-redraw 
-save_tiff rh_m.tif
-rotate_brain_x 90
-redraw 
-save_tiff rh_bottum.tif
-exit
-
-
---------------------------
-for roi_label in $(seq -f "%03g" 2 268)
-do
-f=roi$roi_label
-mri_vol2surf --src $f'.img' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
-mri_vol2surf --src $f'.img' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
-
-mri_cor2label --i $f'_rh.mgh' --surf $SUBJECT rh --id 1 --l ./$f'_rh.label'                                                                                                                   
-mri_cor2label --i $f'_lh.mgh' --surf $SUBJECT lh --id 1 --l ./$f'_lh.label'       
-done
-
-for roi_label in $(seq -f "%03g" 13)
-do
-f=roi$roi_label
-mris_label2annot --s $SUBJECT --h rh --ctab ctab.txt --a $f --l $f'_rh.label' 
-mris_label2annot --s $SUBJECT --h lh --ctab ctab.txt --a $f --l $f'_lh.label'
-done
-
-
-for roi_label in 5    13    30    50    83   138   142   144   159   219
-do
-f=`printf 'roi%03g' $roi_label`
-mris_label2annot --s $SUBJECT --h lh --ctab ctab2.txt --a $f --l $f'_lh.label'
-mris_label2annot --s $SUBJECT --h rh --ctab ctab2.txt --a $f --l $f'_rh.label' 
-done
-
-mris_label2annot --s $SUBJECT --h lh --ctab ctab2.txt --a isfcVSstorylineEffect --l roi219_lh.label --l roi138_lh.label --l roi142_lh.label --l roi144_lh.label --l roi159_lh.label --l roi140_lh.label
-mris_label2annot --s $SUBJECT --h rh --ctab ctab3.txt --a isfcVSstorylineEffect --l roi219_rh.label --l roi005_rh.label --l roi013_rh.label --l roi030_rh.label --l roi050_rh.label --l roi083_rh.label 
-
-tksurfer $SUBJECT lh inflated -annot lh.isfcVSstorylineEffect.annot -curv -gray 
-set f "isfcVSstorylineEffect"
+tksurfer $SUBJECT lh inflated -annot lh.mor.annot 
+set f "mor"
 save_tiff "${f}_lh_l.tif"
 rotate_brain_y 180
 redraw 
 save_tiff "${f}_lh_m.tif"
 exit
 
-tksurfer $SUBJECT rh inflated -annot rh.isfcVSstorylineEffect.annot -curv -gray 
-set f "isfcVSstorylineEffect"
+tksurfer $SUBJECT rh inflated -annot rh.mor.annot 
+set f "mor"
 save_tiff "${f}_rh_l.tif"
 rotate_brain_y 180
 redraw 
 save_tiff "${f}_rh_m.tif"
 exit
 
+-----------------------------------------
+cat ctab.txt | while read line 
+do
+f=$(echo $line | cut -d ' ' -f 2)
+
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$f'_lh.mgh' --out_type mgh
+
+mri_cor2label --i $f'_rh.mgh' --surf $SUBJECT rh --id 1 --l ./$f'_rh.label' \                                                                                                                   
+mri_cor2label --i $f'_lh.mgh' --surf $SUBJECT lh --id 1 --l ./$f'_lh.label' \    
+
+mris_label2annot --s $SUBJECT --h rh --ctab ctab.txt --a $f --l $f'_rh.label' \ 
+mris_label2annot --s $SUBJECT --h lh --ctab ctab.txt --a $f --l $f'_lh.label' \ 
+done
+
+mris_label2annot --s $SUBJECT --h lh --ctab ctab_nonR.txt --a mor --l HG_L_lh.label --l STC_L_lh.label --l PMC_L_lh.label --l SMA_L_lh.label --l aIFG_L_lh.label --l aSTG_L_lh.label --l dPCC_lh.label --l vPCUN_lh.label --l dMFG_L_lh.label --l aANG_L_lh.label --l SFG_lh.label --l aPFC_lh.label --l vmPFC_lh.label --l caMTG_L_lh.label --l aANG_L_lh.label --l lOFG_L_lh.label --l IPL_L_lh.label --l aOFC_L_lh.label --l DLPFC_L_lh.label --l dmPFG_lh.label --l pIFG_L_lh.label --l pMTS_L_lh.label --l SMG_L_lh.label --l aINS_L_lh.label --l vMFG_L_lh.label --l MCC_lh.label --l SFS_L_lh.label --l dPoCS_L_lh.label --l smPFC_lh.label --l dPreCG_L_lh.label --l SOG_L_lh.label --l V1_lh.label --l vV2_lh.label --l V3_lh.label --l V3a_L_lh.label --l hV4_L_lh.label --l ldV2_L_lh.label --l dPCUN_lh.label --l aCUN_lh.label --l LOC_L_lh.label 
+ 
+mris_label2annot --s $SUBJECT --h rh --ctab ctab_nonL.txt --a mor --l HG_R_rh.label --l STC_R_rh.label --l aIFG_R_rh.label --l dPCC_rh.label --l vPCUN_rh.label --l dMFG_R_rh.label --l aANG_R_rh.label --l SFG_rh.label --l aPFC_rh.label --l vmPFC_rh.label --l cMTG_R_rh.label --l lOFG_R_rh.label --l aMTG_R_rh.label --l aANG_R_rh.label --l DLPFC_R_rh.label --l pMTG_R_rh.label --l aOFC_R_rh.label --l dmPFG_rh.label --l IPL_R_rh.label --l vPFC_R_rh.label --l SMG_R_rh.label --l pMTS_R_rh.label --l MCC_rh.label --l dPoCS_R_rh.label --l smPFC_rh.label --l V1_rh.label --l vV2_rh.label --l V3_rh.label --l hV4_R_rh.label --l V3a_R_rh.label --l mldV2_R_rh.label --l dPCUN_rh.label --l aCUN_rh.label --l LOC_R_rh.label 
+
+
+--------------------------
+%% peak lag
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+expdir='/scratch/claire/speaker-listener/'
+for exp in sherlock
+do
+
+for interROItype in roi2rois
+do 
+
+for interSubjType in LL_leave1out
+do
+
+dir_current="${expdir}${exp}/fmri/temporal/circularlagcorr/tr/${interROItype}/mor/${interSubjType}/"
+
+for seed in aANG_L 
+do
+f=$seed'2rois_-15-15_timeShift_peaksNearest_peakLags_pfwe_bined'
+
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi rh --o $dir_current/$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi lh --o $dir_current/$f'_lh.mgh' --out_type mgh 
+
+mris_seg2annot --s $SUBJECT --h lh --seg $dir_current/$f'_lh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_bined_jet.txt' --o $dir_current/$f'_lh.annot' 
+mris_seg2annot --s $SUBJECT --h rh --seg $dir_current/$f'_rh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_bined_jet.txt' --o $dir_current/$f'_rh.annot' 
+
+done
+done 
+done 
+done 
+
+%lh
+tksurfer  $SUBJECT lh inflated -curv -gray 
+
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+
+foreach exp [list sherlock] {
+foreach interROItype [list roi2rois] {
+foreach interSubjType [list LL_leave1out] {
+foreach seed [list aANG_L ] {
+set dir_current "${expdir}${exp}/fmri/temporal/circularlagcorr/tr/${interROItype}/mor/${interSubjType}/"
+
+set f "${seed}2rois_-15-15_timeShift_peaksNearest_peakLags_pfwe_bined"
+
+labl_import_annotation "${dir_current}/${f}_lh.annot"
+redraw 
+save_tiff "${dir_current}/${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_lh_m.tif"
+rotate_brain_y 180
+labl_remove_all
+}}}}
+exit
+
+
+% rh
+tksurfer  $SUBJECT rh inflated -curv -gray 
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+
+foreach exp [list sherlock] {
+foreach interROItype [list roi2rois] {
+foreach interSubjType [list LL_leave1out] {
+foreach seed [list aANG_L ] {
+set dir_current "${expdir}${exp}/fmri/temporal/circularlagcorr/tr/${interROItype}/mor/${interSubjType}/"
+
+set f "${seed}2rois_-15-15_timeShift_peaksNearest_peakLags_pfwe_bined"
+
+labl_import_annotation "${dir_current}/${f}_rh.annot"
+redraw 
+save_tiff "${dir_current}/${f}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_rh_m.tif"
+rotate_brain_y 180
+labl_remove_all
+}}}}
+exit
+
+
+
+
+
+ 

@@ -3,16 +3,17 @@ clear
 set_parameters;
 
 resamp_factor = 1;
-cropped='cropped';%'uncropped',"";
-role='speaker';
+cropped='';%'_uncropped',"";
+role='listener';
 
-for ei = 1:2;%:4;
-    %  stimname =ls([expdir experiments{ei} '/sound/*wav']);
-    % stimname=[experiments{ei} '_' role '_' cropped];
-    stimname=ls([expdir experiments{ei} '/sound/*wav']);
-    stimname=strrep( stimname,'.wav','');
+for ei = 6;
+    exp=exp_parameters.experiments{ei};
+     stimname =ls([expdir exp '/sound/*wav']);
+    stimname=[exp '_' role cropped];
+    % stimname=ls([expdir exp '/sound/*wav']);
+    % stimname=strrep( stimname,'.wav','');
     
-    [w, audfs] = audioread([expdir experiments{ei} '/sound/' stimname '.wav']);
+    [w, audfs] = audioread([expdir exp '/sound/' stimname '.wav']);
     
     w0=w;
     %audiowrite([expdir experiments{ei} '/sound/' experiments{ei} '.wav'],w0,audfs)
@@ -29,7 +30,7 @@ for ei = 1:2;%:4;
     
     boldcrop = stim_time > 0; % wav_crop_start(ei);
     audpow = stim_mod(boldcrop);
-    audpow_slow = resample(audpow,1,(audfs/resamp_factor)*tr(ei));
+    audpow_slow = resample(audpow,1,(audfs/resamp_factor)*exp_parameters.tr(ei));
     
     tshift = 0; %
     audpow_slow = round(1000+100*zscore(audpow_slow));
@@ -37,16 +38,16 @@ for ei = 1:2;%:4;
     audenv = audpow_slow_shifted_100;
     aud=audenv;
     
-    save( [expdir experiments{ei} '/sound/'  stimname '_audenv'],'aud');
+    save( [expdir exp '/sound/'  stimname '_audenv'],'aud');
     %   save([expdir experiments{ei} '/sound/'  experiments{ei} '_' role '_'  cropped '_audenv'],'aud');
     
-    xBF.dt=tr(ei); % TR
+    xBF.dt=exp_parameters.tr(ei); % TR
     xBF.name='hrf'% (with time and dispersion derivatives)';
     bf = spm_get_bf(xBF)
     
     audenv=audenv-mean(audenv);
     aud=conv(audenv,bf.bf);
-    save( [expdir experiments{ei} '/sound/'  stimname '_audhrf'],'aud');
+    save( [expdir exp '/sound/'  stimname '_audhrf'],'aud');
     %  save( [expdir experiments{ei} '/sound/'  experiments{ei} '_' role '_' cropped '_audhrf'],'aud');
     
 end

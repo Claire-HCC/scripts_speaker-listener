@@ -2,10 +2,10 @@
 #SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 15:00:00
-#SBATCH -c 10
-#SBATCH --array=1-10
-#SBATCH --mem-per-cpu=1G
+#SBATCH -t 3:00:00
+#SBATCH -c 3
+#SBATCH --array=2-4
+#SBATCH --mem-per-cpu=500M
 #SBATCH --mail-type=END
 #SBATCH --mail-user=hcchang73@gmail.com
 
@@ -19,7 +19,7 @@ perm=$SLURM_ARRAY_TASK_ID
 declare -i perm
 
 
-matlab -nodisplay -r "wholeBrain_phasePerm_L($perm)"
+matlab -nodisplay -r "simulation_pallier($perm)"
 
 
 

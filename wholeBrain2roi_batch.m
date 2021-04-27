@@ -1,49 +1,36 @@
-clear all;
+function wholeBrain2roi_batch(ei)
 
 loc='cluster';
 set_parameters;
 timeUnit='tr' ;
 
-froidir='mor';
+froidir='aal';
 rnames=dir([expdir '/roi_mask/'  froidir '/mat/*.mat']);
 rnames=strrep({rnames.name},'.mat','');
 
-tic % 15 min
+exp=exp_parameters.experiments{ei}
 
-for ei=1:2;%1:4;
-    exp=experiments{ei};
-    
-    mkdir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir ]);
-    f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/listenerAll_zscore.mat',expdir,exp,timeUnit);
-    load(f,'gdata','keptvox');
-    gdata_listener=gdata;
-    
-    clear gdata
-    f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/speaker_zscore.mat',expdir,exp,timeUnit);
-    load(f,'data','keptvox');
-    data_speaker=data;
-        
-    for ri=1:length(rnames);
-        rname=rnames{ri};
-        fr = sprintf('%s/roi_mask/%s/mat/%s',expdir,froidir,rname);
-        load(fr,'roimask');
-        
-        if sum(roimask(keptvox))>10;
-            clear gdata
-            gdata=gdata_listener(logical(roimask(keptvox)),:,:);
-            if ~isempty(gdata);
+mkdir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir ]);
+f= sprintf('%s/%s/fmri/timeseries/%s/wholeBrain/listenerAll.mat',expdir,exp,timeUnit);
+load(f,'gdata','keptvox');
+keptvox_wholeBrain_L=keptvox;
+gdata_listener=gdata;
+clear gdata
 
-                save([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname ],'gdata');
-            end
-            
-            clear data
-            data=data_speaker(logical(roimask(keptvox)),:,:);
-            if ~isempty(data);
-                save([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rname ],'data');
-            end
-            
-            clear data
+for ni=1:length(rnames);
+    rname=rnames{ni};
+    fr = sprintf('%s/roi_mask/%s/mat/%s',expdir,froidir,rname);
+    load(fr,'roimask');
+    
+    if sum(roimask(keptvox_wholeBrain_L))>10;
+        clear gdata
+        gdata=gdata_listener(logical(roimask(keptvox_wholeBrain_L)),:,:);
+        
+        if ~isempty(gdata);
+            keptvox=keptvox_wholeBrain_L(ismember(keptvox_wholeBrain_L,find(roimask)));
+            save([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_' rname ],'gdata','keptvox');
         end
+        
     end
 end
-beep;
+

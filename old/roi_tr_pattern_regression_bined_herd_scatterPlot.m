@@ -4,10 +4,10 @@ close all
 set_parameters;
 timeUnit='tr' ;
 froidir='mor';
-lags=-10:-4;
+lags=-10:-3;
 binSize=10;
 binStep=1;
-rname='HG_L'
+rname='vPCUN'
 load([expdir '/roi_mask/mor/' 'roi_id_region.mat'],'roi_table');
 exp=experiments{2};
 

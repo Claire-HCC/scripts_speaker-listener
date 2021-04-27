@@ -1,0 +1,100 @@
+% copy data from Sam
+for s in {01..48}; do cp  /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-bronx_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/listener/; done 
+cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-bronx_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/bronx/speaker/
+
+for s in {01..48}; do cp  /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/afni/sub-${s}/func/sub-${s}_task-pieman_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/listener/; done 
+cp /usr/people/snastase/storyteller/data/derivatives/afni/sub-01/func/sub-01_task-pieman_acq-277vol_space-MNI152NLin2009cAsym_sm6_3x3x4mm_tproject.nii.gz /scratch/claire/speaker-listener/FromOthers/fromSam/pieman/speaker/
+
+
+% change file type. NIFTI_GZ > NIFTI
+role=listener;
+for exp in bronx pieman; do
+for s in {01..48}; do 
+f=`ls /scratch/claire/speaker-listener/FromOthers/fromSam/${exp}/${role}/sub-${s}*`
+fslchfiletype NIFTI $f "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}"; 
+done ;
+done 
+
+dir_current='/scratch/claire/speaker-listener/FromOthers/fromSam/prettymouth/listener'
+for f in "$dir_current"/*.nii.gz; do
+% f=$(echo ${f} | sed -e "s/.nii.gz//g")
+f=$(basename $f)
+f=$(echo "$f" | cut -f 1 -d '.')
+echo $f
+fslchfiletype NIFTI ${f}'.nii.gz' ${f}
+done
+
+% crop file
+Bronx speaker recording starts with 10 TRs of silence. Voiced period lasts for 358 TRs
+Pieman speaker recording starts with 6 TRs of silence. Voiced period lasts for 267 TRs.
+For the listner, there are 8 TRs of silence before and after playing the speaker recording respectively.
+
+prettymouth starts with 14 TRs of music. Voiced period lasts for 450 TRs.
+2 TRs for hrf delays (instead od 3 TRs, this is determined by aduio-envelope analysis)
+
+role=speaker
+exp=bronx
+TR_n=358
+crop_start=12 # 2+10(to crop 13 TR, we need to start from 14) 
+for s in {01..01}; do 
+fslroi  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s}" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} ";
+done ;
+
+role=listener
+exp=bronx
+TR_n=358
+crop_start=20 # 2+10+8 
+for s in {01..48}; do  
+fslroi  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s}" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} ";
+done ;
+
+role=speaker
+exp=pieman
+TR_n=267
+crop_start=8 # 2+6 
+for s in {01..01}; do 
+ fslroi  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s}.nii" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} ";
+done ;
+
+role=listener
+exp=pieman
+TR_n=267
+crop_start=16 # 2+6+8
+for s in {01..09}; do  
+fslroi  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s}.nii" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} ";
+done ;
+
+role=listener
+exp=pieman
+TR_n=267
+crop_start=16 # 2+6+8
+for s in {11..48}; do  
+fslroi  "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr_uncropped/${role}${s}" "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s}.nii" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${role}${s} ";
+done ;
+
+% for pieman0, the first and last 10 TR were cropped, fowwling Simony (2016). 
+% for the results of audio-envelope analysis were weired. Some subjects are apparantly different from the others, and the peak is not at lag zero. 
+
+
+role=listener
+exp=prettymouth
+TR_n=450
+crop_start=16 # 2+21
+dir_current='/scratch/claire/speaker-listener/FromOthers/fromSam/prettymouth/listener'
+for f in "$dir_current"/*.nii; do
+f=$(basename $f)
+f=$(echo "$f" | cut -f 1 -d '.')
+echo $f
+fslroi  ${f} "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${f}.nii" ${crop_start} ${TR_n}
+fslchfiletype NIFTI "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${f} " "/scratch/claire/speaker-listener/${exp}/fmri/timeseries/tr/wholeBrain/${f} ";
+done ;
+
+
+
+
+

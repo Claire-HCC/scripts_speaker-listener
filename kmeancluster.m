@@ -1,4 +1,4 @@
-eva = evalclusters(r,'kmeans','silhouett','KList',[1:10],'Distance','correlation')
+eva = evalclusters(g,'kmeans','silhouett','KList',[1:10],'Distance','correlation')
 [idx,C,sumd,D] = kmeans(r,2,'Distance','correlation');
 
 
@@ -14,3 +14,12 @@ end
     eva = evalclusters(r_temp,'kmeans','silhouett','KList',[1:10],'Distance','correlation')
     [idx,C,sumd,D] = kmeans(r_temp,4,'Distance','correlation');
     
+       load('listenerAll_zscore.mat')
+    k=6;
+ 
+g=nanmean(gdata,3);
+[idx,C,sumd,D] = kmeans(g(:,26:end),k,'Distance','correlation');
+mat=nan(voxn,1);
+mat(keptvox)=idx;
+nii=mat2nii(mat);
+save_nii(nii,'networks');

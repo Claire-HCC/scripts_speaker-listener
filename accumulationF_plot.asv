@@ -1,0 +1,42 @@
+accumulationFs={'linear', 'log', 'triangle','boxcar','linearR','expn','time'};
+figure;
+for af=1:length(accumulationFs);
+    accumulationF=accumulationFs{af};
+    
+    temp=ones(1,11);
+    if strcmp(accumulationF,'linear');
+        temp=cumsum(temp);
+    elseif     strcmp(accumulationF,'log');
+        temp=cumsum(temp);
+        temp=log(temp+1);
+        
+    elseif strcmp(accumulationF,'triangle');
+        temp=cumsum(temp);
+        mx=quantile(unique(temp),0.5);
+        temp= mx-(abs(temp-mx));
+        
+    elseif strcmp(accumulationF,'boxcar');
+        
+    elseif strcmp(accumulationF,'linearR');
+        temp=cumsum(temp);
+        temp=fliplr(temp);
+        
+    elseif  strcmp(accumulationF,'expn');
+        temp=cumsum(temp);
+        temp=exp(temp+1);
+        
+    elseif strcmp(accumulationF,'time');
+        temp=1:length(temp);
+    end
+    
+    subplot(1,length(accumulationFs),af);
+    xlim([0 17]);
+   
+    temp=[repmat(min(temp),1,5) temp repmat(min(temp),1,5)];
+    plot(temp,'color','k','linewidth',2);
+    ylim([min(temp) max(temp)]);
+    hold on
+    line([0 length(temp)],[min(temp) min(temp)],'color','k','linewidth',2)
+    axis off
+    hold off
+end

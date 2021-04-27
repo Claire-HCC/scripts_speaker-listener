@@ -2,28 +2,27 @@
 #SBATCH -J 'matlab_job'
 #SBATCH -o slurm-%j.out
 #SBATCH -p all
-#SBATCH -t 3:00:00
+#SBATCH -t 5:00:00
 #SBATCH -c 10
-#SBATCH --array=11-18
-#SBATCH --mem-per-cpu=2G
-#SBATCH --mail-type=NONE
+#SBATCH --array=1-48
+#SBATCH --mem-per-cpu=1G
+#SBATCH --mail-type=END
 #SBATCH --mail-user=hcchang73@gmail.com
 
 module load fsl
 
 expdir="/mnt/sink/scratch/claire/speaker-listener/"
 
-# fs=`ls $expdir/$exp/fmri/timeseries/tr/roi/mor/zscore_listenerAll_*.mat`
 
 perm=$SLURM_ARRAY_TASK_ID
 declare -i perm
 
-flirt -in /scratch/claire/speaker-listener/merlin/fmri/timeseries/tr/wholeBrain/3x3x3mm/listener$(printf "%02d" "$perm").nii -ref /scratch/claire/speaker-listener/roi_mask/MNI152NLin2009cAsym_3x3x4mm_brain.nii -out /scratch/claire/speaker-listener/merlin/fmri/timeseries/tr/wholeBrain/listener$(printf "%02d" "$perm").nii  -applyxfm -usesqform
-fslchfiletype NIFTI /scratch/claire/speaker-listener/merlin/fmri/timeseries/tr/wholeBrain/listener$(printf "%02d" "$perm").nii.gz /scratch/claire/speaker-listener/merlin/fmri/timeseries/tr/wholeBrain/listener$(printf "%02d" "$perm").nii
+dir_current=$(printf "/scratch/claire/speaker-listener/fmri_preprocesing/subjects/sub-%02d" "$perm")
+echo "${dir_current}"
+cd "${dir_current}"
+# srun analyze.sh
 
-
-
-
+srun ./scripts/apply-transform.sh
 
 
 

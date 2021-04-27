@@ -1,84 +1,75 @@
-clear all;
+function roi_tr_pattern_regression_SL
 
-tic
 % loc='cluster';
 set_parameters;
 timeUnit='tr' ;
-
 froidir='mor';
-
 load([expdir '/roi_mask/' froidir '/roi_id_region.mat'],'roi_table');
-tic % 15 min
+rnames=table2array(roi_table(:,3));
 
-% cropt start because ther eis clearly a spech-start effect in the
-% lsiteners' data
 crop_start=10;
+lags_tested={-15:15, -10:10,  -40:40, -10:-1 , -40:-1, 1:10,  1:40 , -4:4};
 
-lags=-10:10;
 for ei=1:4;
     exp=experiments{ei};
-    rnames=dir([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/'  froidir '/zscore_listenerAll_*.mat']);
-    rnames={rnames.name};
-    rnames=strrep(rnames,'zscore_listenerAll_','');
-    rnames=strrep(rnames,'.mat','');
-    rnames=rnames';
-    rnames=rnames(ismember(rnames,roi_table.region));
     
-    b=[];
-    roi_ids=[];
-    r2=[];
-    F=[];
-    for ri=54;%1:length(rnames);
-        clear data_mat
-        rname=rnames{ri};
+    for lagi=1;%:length(lags_tested);
+        lags=lags_tested{lagi};
         
-        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_listenerAll_' rname '.mat' ],'gdata');
-        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/zscore_speaker_' rname '.mat'],'data');
+        load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rnames{1} '.mat' ],'data')
+        tn=size(data,2);
         
-        %% isc or pattern
-        % gdata=nanmean(gdata,1);
-        % data=nanmean(data,1);
+        b=nan([length(rnames) length(lags)+1 ]);
+        r2=nan([length(rnames) 1 ]);
+        F=nan([length(rnames) 1]);
+        p=nan([length(rnames) 1]);
+        r2_byTime=nan([length(rnames),tn]);
         
-        roi_voxn=size(gdata,1);
-        roi_tn=size(gdata,2);
-        
-        g=nanmean(gdata,3);
-        y=g;
-        keptT=(abs(min(lags))+1+crop_start):(roi_tn-max([lags, 0]));
-        y=y(:,keptT);
-        y=y(:);
-        
-        for li=1:length(lags);
-            X(:,:,li)=data(:,keptT+lags(li));
+        for ri=1:size(rnames);
+            rname=rnames{ri};
+            
+            if exist([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat' ]);
+                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/listenerAll_zscore_' rname '.mat' ],'gdata');
+                load([expdir '/' exp '/fmri/timeseries/' timeUnit '/roi/' froidir '/speaker_zscore_' rname '.mat'],'data');
+                
+                roi_voxn=size(gdata,1);
+                
+                keptT_s=min(find(([1:tn]+min(lags))>0))+crop_start;
+                keptT_e=min(tn,tn-max(lags));
+                keptT=keptT_s:keptT_e;
+                
+                g=nanmean(gdata,3);
+                y=g;
+                y=y(:,keptT);
+                y=y(:);
+                
+                for li=1:length(lags);
+                    X(:,:,li)=data(:,keptT+lags(li));
+                end
+                
+                X=reshape(X,roi_voxn*length(keptT),length(lags));
+                X=X-mean(X);
+                
+                [b(ri,:),~,r,~,stats]=regress(y,[ones(size(X,1),1) X]);
+                
+                r2(ri,1)=stats(1);
+                F(ri,1)=stats(2);
+                p(ri,1)=stats(3);
+                
+                ymat=reshape(y,roi_voxn,length(keptT));
+                rmat=reshape(r,roi_voxn,length(keptT));
+                ssr=sum(rmat.^2);
+                sst=sum((ymat-mean(y)).^2);
+                
+                r2_byTime(ri,:)=nan(tn,1);
+                r2_byTime(ri,keptT)=1-ssr./sst;
+                
+                clear X
+            end
         end
         
-        X=reshape(X,roi_voxn*length(keptT),length(lags));
-        
-        % centralized X
-        X=X-mean(X);
-        
-        % add an constant
-        X=[ones(size(X,1),1) X];
-        
-        [b(ri,:),~,~,~,stats]=regress(y,X);
-        
-        r2(ri,:)=stats(1);
-        F(ri,:)=stats(2);
-        p(ri,:)=stats(3);
-        
-        Y=X*b(ri,:)';
-        Y=reshape(Y,roi_voxn,length(keptT));
-        y=reshape(y,roi_voxn,length(keptT));
-        coupling(ri,:)=zeros(1,roi_tn);
-        coupling(ri,keptT)=corr_col(y,Y);
-        
-        clear X
+        save([expdir '/' exp '/fmri/pattern/regression/' timeUnit '/roi/' froidir '/SL_g/lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','lags','rnames','keptT','r2_byTime');
+        clear b F p r2 r2_byTime
     end
-    
-    couplingz=0.5*log((1+coupling)./(1-coupling));
-    save([expdir '/' exp '/fmri/pattern_regression/' timeUnit '/roi/' froidir '/regression_SL_lag' num2str(min(lags)) '-' num2str(max(lags)) ],'b','F','r2','p','couplingz','lags','rnames','keptT');
-    clear b F p r2 rnames coupling
 end
 
-toc
-beep

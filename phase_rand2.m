@@ -1,6 +1,8 @@
 function [x_t, rp, x_amp,sym_phase] = phase_rand2(x,permutation,rp)
 % The difference between phase_rand and phase_rand2 is that
-% phase_rand2 outputs rp and also takes rp as input argument.
+% 1) phase_rand2 outputs rp and also takes rp as input argument.
+% 2)in phase_rand2, when choosing phermutation = 0, the same phase randomization
+% is applied across columns.
 % function [truecorr, pvals, nullcorrs] = PHASE_RAND_CORR(x,y,nscram, tail)
 %
 % This function calculates the correlation between
@@ -49,9 +51,7 @@ x_phase = atan2(imag(Fx), real(Fx)); %get the phases of the Fourier components [
 J = sqrt(-1);  %define the vertical vector in the complex plane
 
 % will contain symmetrized randomized phases for each bootstrap
-sym_phase = x_phase;%zeros(Nsamp,K); 
-
-
+sym_phase = x_phase;%zeros(Nsamp,K);
 
 % Phase scramble
 if permutation
@@ -64,7 +64,13 @@ if permutation
         new_phase=x_phase(1:length(posfreqs),:);
     end
 else
-    new_phase=2*pi*rand(length(posfreqs),K);
+    %    new_phase=2*pi*rand(length(posfreqs),K);
+    if nargin>2;
+        new_phase=2*pi*repmat(rp,1,K);
+    else
+        rp=rand(length(posfreqs),1);
+        new_phase=2*pi*repmat(rp,1,K);
+    end
 end
 
 sym_phase(posfreqs,:) = sym_phase(posfreqs,:)+new_phase;

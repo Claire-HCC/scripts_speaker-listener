@@ -1,0 +1,86 @@
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask/'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+
+f='Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peakLags5bins'
+dir_current='.'
+expdir='/scratch/claire/speaker-listener/'
+
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi rh --o $dir_current/$f'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $dir_current/$f'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register2surface.dat --hemi lh --o $dir_current/$f'_lh.mgh' --out_type mgh 
+
+mris_seg2annot --s $SUBJECT --h lh --seg $dir_current/$f'_lh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_5bins_jet.txt' --o $dir_current/$f'_lh.annot' 
+mris_seg2annot --s $SUBJECT --h rh --seg $dir_current/$f'_rh.mgh' --ctab $expdir'/scripts_speaker-listener/ctab_peakLag_5bins_jet.txt' --o $dir_current/$f'_rh.annot' 
+
+
+tksurfer  $SUBJECT lh inflated -curv -gray 
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+set f "Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peakLags5bins"
+set dir_current "."
+
+labl_import_annotation "${dir_current}/${f}_lh.annot" 
+redraw 
+save_tiff "${dir_current}/${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_lh_m.tif"
+
+tksurfer  $SUBJECT rh inflated -curv -gray
+set SUBJECTS_DIR "/scratch/claire/speaker-listener/roi_mask"
+set SUBJECT "MNI152NLin2009cAsym_3x3x4mm_brain"
+set expdir "/scratch/claire/speaker-listener/"
+set f "Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peakLags5bins"
+set dir_current "."
+
+labl_import_annotation "${dir_current}/${f}_rh.annot"
+redraw 
+save_tiff "${dir_current}/${f}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_rh_m.tif"
+
+
+--------------------------------------
+% peak R with significant outline
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask/'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+
+f='Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peaks'
+dir_current='.'
+expdir='/scratch/claire/speaker-listener/'
+
+tksurfer  $SUBJECT lh inflated -curv -gray -fminmax 0 0.25 -fthresh 0.0000001 -annot Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_pfdr_mask_lh.annot -label-outline -overlay Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peaks_lh.mgh
+set f "Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peaks"
+set dir_current "."
+
+save_tiff "${dir_current}/${f}_lh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_lh_m.tif"
+
+
+tksurfer  $SUBJECT rh inflated -curv -gray -fminmax 0 0.25 -fthresh 0.0000001 -annot Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_pfdr_mask_rh.annot -label-outline -overlay Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peaks_rh.mgh
+set f "Angular_L2voxIsc30PercMasked_lag-15-15_timeReversed_peaks"
+set dir_current "."
+
+save_tiff "${dir_current}/${f}_rh_l.tif"
+rotate_brain_y 180
+redraw 
+save_tiff "${dir_current}/${f}_rh_m.tif"
+---------------------------------
+% seed mask
+SUBJECTS_DIR='/scratch/claire/speaker-listener/roi_mask/'
+SUBJECT='MNI152NLin2009cAsym_3x3x4mm_brain'
+froi='Angular_L'
+
+mri_vol2surf --src $froi'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi rh --o ./$froi'_rh.mgh' --out_type mgh 
+mri_vol2surf --src $froi'.nii' --srcreg $SUBJECTS_DIR/$SUBJECT/register.dat --hemi lh --o ./$froi'_lh.mgh' --out_type mgh
+
+% specify the color with colortable
+mris_seg2annot --seg $froi'_lh.mgh' --ctab $expdir'/scripts_speaker-listener//ctab_roimask.txt' --h lh --s $SUBJECT --o ./$froi'_lh'
+mris_seg2annot --seg $froi'_rh.mgh' --ctab $expdir'/scripts_speaker-listener//ctab_roimask.txt' --h rh --s $SUBJECT --o ./$froi'_rh'
+
+
+
+

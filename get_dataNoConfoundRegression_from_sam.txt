@@ -1,0 +1,17 @@
+
+for exp in black forgot pieman bronx; do
+dir_current="/scratch/claire/speaker-listener/${exp}_fmriprep_noConfoundRegression/fmri/timeseries/tr_uncropped/wholeBrain/" 
+find . -name "sub-*_task-${exp}_bold_space-MNI152NLin2009cAsym_sm6_3x3x4mm_preproc.nii.gz" -exec cp "{}" ${dir_current}  \;
+done
+
+for exp in black forgot pieman bronx ; do
+dir_current="/scratch/claire/speaker-listener/${exp}_fmriprep_noConfoundRegression/fmri/timeseries/tr_uncropped/wholeBrain/" 
+for s in {01..48}; do 
+fslchfiletype NIFTI "${dir_current}/sub-${s}_task-${exp}_bold_space-MNI152NLin2009cAsym_sm6_3x3x4mm_preproc.nii.gz" "${dir_current}/sub-${s}_task-${exp}bold_space-MNI152NLin2009cAsym_sm6_3x3x4mm_preproc"
+done
+done
+
+for exp in black forgot  ; do
+dir_current="/scratch/claire/speaker-listener/${exp}_fmriprep_noConfoundRegression/movements/listeners/" 
+find /jukebox/hasson/snastase/storyteller/fmri/bids/Hasson/Nastase/042518_Storyteller/derivatives/fmriprep/ -name "*${exp}*bold_confounds.tsv" -exec cp "{}" ${dir_current}  \;
+done
